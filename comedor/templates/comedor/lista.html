@@ -1,0 +1,55 @@
+{% extends "comedor/base_comedor.html" %}
+
+{% block title %}Ver comedor · Comedor{% endblock %}
+{% block titulo_pagina %}Ver comedor{% endblock %}
+
+{% block content %}
+  {% if comidas %}
+    <ul class="platos">
+      {% for comida in comidas %}
+        <li class="plato">
+          <div class="plato-foto"><img src="{{ comida.imagen.url }}" alt="{{ comida.nombre }}" width="96" height="96"></div>
+          <div class="plato-cuerpo">
+            <h2 class="plato-nombre">{{ comida.nombre }}</h2>
+            {% with ingredientes=comida.ingredientes_lista %}
+              <ul class="chips chips-lectura">
+                {% for ingrediente in ingredientes|slice:":5" %}<li class="chip">{{ ingrediente }}</li>{% endfor %}
+                {% if ingredientes|length > 5 %}<li class="chip chip-mas">+{{ ingredientes|length|add:"-5" }} más</li>{% endif %}
+              </ul>
+            {% endwith %}
+            <div class="plato-acciones">
+              <a href="{% url 'comedor:editar' comida.pk %}" class="enlace-accion">
+                <svg class="icono" aria-hidden="true"><use href="#i-lapiz"></use></svg> Editar
+              </a>
+              <form method="post" action="{% url 'comedor:eliminar' comida.pk %}"
+                    onsubmit="return confirm('¿Eliminar {{ comida.nombre|escapejs }}?');">
+                {% csrf_token %}
+                <button type="submit" class="enlace-accion enlace-peligro">
+                  <svg class="icono" aria-hidden="true"><use href="#i-basura"></use></svg> Eliminar
+                </button>
+              </form>
+            </div>
+          </div>
+          <span class="etiqueta etiqueta-precio">${{ comida.precio }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="vacio">
+      <svg class="icono icono-grande" aria-hidden="true"><use href="#i-cubiertos"></use></svg>
+      <p>Todavía no hay comidas guardadas en el menú.</p>
+      <a class="boton boton-primario" href="{% url 'comedor:agregar' %}">
+        <svg class="icono" aria-hidden="true"><use href="#i-mas"></use></svg> Agregar comida
+      </a>
+    </div>
+  {% endif %}
+
+  <div class="barra-acciones">
+    <a class="boton boton-secundario" href="{% url 'comedor:inicio' %}">
+      <svg class="icono" aria-hidden="true"><use href="#i-atras"></use></svg> Atrás
+    </a>
+    <a class="boton boton-primario" href="{% url 'comedor:agregar' %}">
+      <svg class="icono" aria-hidden="true"><use href="#i-mas"></use></svg> Agregar comida
+    </a>
+  </div>
+{% endblock %}

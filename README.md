@@ -11,3 +11,19 @@ cuando le muevan a sus models.py (que es la base de datos) en la terminal escrib
 "python manage.py makemigrations" que este hace es cargar como en fila las ediciones de la base de datos,
 despues ejecutan:
 "python manage.py migrate" que este ya hace los cambios a la base de datos
+
+--- Area del comedor ---
+
+Entrar en http://localhost:8000/comedor/
+Usuario del comedor (se crea solo con "migrate"): comedor / comedor123
+Para cambiarlo, definir COMEDOR_USUARIO y COMEDOR_PASSWORD antes de correr "migrate".
+
+El modelo Comida (comedor/models.py) tiene: nombre, ingredientes, precio e imagen. Las comidas se guardan en el menu hasta que se editen o eliminen manualmente.
+Los ingredientes se guardan uno por linea en el campo "ingredientes"; para usarlos como lista:
+comida.ingredientes_lista (ejemplo en comedor/templates/comedor/lista.html).
+Los clientes se identifican como usuarios normales de Django; el comedor es el unico usuario con is_staff=True.
+
+Para usar el mismo diseno en otras apps: {% extends "base.html" %} (templates/base.html y static/css/base.css).
+Las fotos subidas se guardan en media/ (no se sube a git). Hace falta Pillow (ya esta en requirements.txt).
+
+Pruebas: python manage.py test comedor

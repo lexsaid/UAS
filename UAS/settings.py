@@ -57,7 +57,7 @@ ROOT_URLCONF = 'UAS.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -105,9 +105,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-mx'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Mexico_City'
 
 USE_I18N = True
 
@@ -118,6 +118,18 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# CSS compartido del proyecto (static/css/base.css)
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
+
+# Archivos subidos por los usuarios (fotos de comidas, perfiles, comprobantes)
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# Login del comedor: las vistas protegidas mandan aqui cuando no hay sesion
+LOGIN_URL = 'comedor:login'
 
 
 # Email

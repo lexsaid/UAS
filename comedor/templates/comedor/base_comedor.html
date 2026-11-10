@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'comedor/comedor.css' %}">
+{% endblock %}
+
+{% block header %}
+  {# Iconos que se reutilizan en todas las pantallas del comedor #}
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-cubiertos" viewBox="0 0 24 24"><path d="M6 3v6a2.5 2.5 0 0 0 5 0V3M8.5 3v18M17 21V3c-2.6 1.4-3.5 4.4-3.5 8H17"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-pedidos" viewBox="0 0 24 24"><path d="M9 4h6v3H9zM7 5.5H6a1 1 0 0 0-1 1V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6.5a1 1 0 0 0-1-1h-1M9 12h6M9 16h4"/></symbol>
+    <symbol id="i-lapiz" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></symbol>
+    <symbol id="i-basura" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+    <symbol id="i-camara" viewBox="0 0 24 24"><path d="M4 8h3l1.5-2.5h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-atras" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="cabecera-marca">
+      <span class="cabecera-icono" aria-hidden="true"><svg class="icono"><use href="#i-cubiertos"></use></svg></span>
+      <h1 class="cabecera-titulo">{% block titulo_pagina %}Comedor{% endblock %}</h1>
+    </div>
+
+    <details class="nav-desplegable">
+      <summary aria-label="Abrir navegación"><span class="hamburguesa" aria-hidden="true"></span></summary>
+      <nav class="nav-panel" aria-label="Navegación del comedor">
+        <a href="{% url 'comedor:inicio' %}">Inicio</a>
+        <a href="{% url 'comedor:lista' %}">Ver comedor</a>
+        <a href="{% url 'comedor:agregar' %}">Agregar comida</a>
+        <span class="nav-pendiente">Solicitudes de comida (próximamente)</span>
+        <form method="post" action="{% url 'comedor:salir' %}">
+          {% csrf_token %}
+          <button type="submit">Cerrar sesión</button>
+        </form>
+      </nav>
+    </details>
+  </header>
+{% endblock %}

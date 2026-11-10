@@ -1,0 +1,113 @@
+{% extends "comedor/base_comedor.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} · Comedor{% endblock %}
+{% block titulo_pagina %}{{ titulo }}{% endblock %}
+{% block body_class %}pagina-ancha{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <script src="{% static 'comedor/form_comida.js' %}" defer></script>
+{% endblock %}
+
+{% block content %}
+  <div class="form-layout">
+
+    <form method="post" enctype="multipart/form-data" class="form-comida" data-form-comida novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="errores-form" role="alert">
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="campo campo-nombre">
+        <label for="{{ form.nombre.id_for_label }}">{{ form.nombre.label }}</label>
+        {{ form.nombre }}
+        {% include "comedor/_errores.html" with campo=form.nombre %}
+      </div>
+
+      <div class="campo campo-foto">
+        <span class="campo-titulo">{{ form.imagen.label }}</span>
+        <label class="dropzone{% if comida and comida.imagen %} tiene-foto{% endif %}" for="{{ form.imagen.id_for_label }}" data-dropzone>
+          <img class="dropzone-img" data-foto-img alt="Foto de la comida"
+               {% if comida and comida.imagen %}src="{{ comida.imagen.url }}"{% else %}hidden{% endif %}>
+          <span class="dropzone-vacio" data-foto-vacio {% if comida and comida.imagen %}hidden{% endif %}>
+            <svg class="icono icono-grande" aria-hidden="true"><use href="#i-camara"></use></svg>
+            <span class="dropzone-titulo">Elige una foto</span>
+            <span class="dropzone-texto">Toca aquí o arrástrala desde tu computadora</span>
+          </span>
+          <span class="dropzone-cambiar">
+            <svg class="icono" aria-hidden="true"><use href="#i-camara"></use></svg> Cambiar foto
+          </span>
+        </label>
+        {{ form.imagen }}
+        {% include "comedor/_errores.html" with campo=form.imagen %}
+      </div>
+
+      <div class="campo campo-ingredientes">
+        <label for="ingrediente-nuevo" class="solo-js">{{ form.ingredientes.label }}</label>
+        <label for="{{ form.ingredientes.id_for_label }}" class="sin-js">{{ form.ingredientes.label }} (uno por línea)</label>
+
+        <div class="ingrediente-entrada solo-js">
+          <input type="text" id="ingrediente-nuevo" placeholder="Ej. Tortilla de maíz" autocomplete="off" maxlength="60" enterkeyhint="done">
+          <button type="button" class="boton boton-primario" data-agregar>
+            <svg class="icono" aria-hidden="true"><use href="#i-mas"></use></svg> Agregar
+          </button>
+        </div>
+        <p class="ayuda solo-js" data-aviso-ingrediente aria-live="polite">
+          Escribe un ingrediente y presiona Enter. Si pegas varios separados por comas, se agregan uno por uno.
+        </p>
+        <ul class="chips chips-editables solo-js" data-chips aria-label="Ingredientes agregados"></ul>
+
+        {# Este campo es el que se guarda. Con JavaScript se esconde y se llena solo. #}
+        <div class="ingredientes-texto">{{ form.ingredientes }}</div>
+        {% include "comedor/_errores.html" with campo=form.ingredientes %}
+      </div>
+
+      <div class="campo campo-precio">
+        <label for="{{ form.precio.id_for_label }}">{{ form.precio.label }}</label>
+        <div class="precio-etiqueta">
+          <span class="precio-signo" aria-hidden="true">$</span>
+          {{ form.precio }}
+        </div>
+        {% include "comedor/_errores.html" with campo=form.precio %}
+      </div>
+
+      <div class="barra-acciones">
+        <a class="boton boton-secundario" href="{{ volver }}">
+          <svg class="icono" aria-hidden="true"><use href="#i-atras"></use></svg> Atrás
+        </a>
+        <button type="submit" class="boton boton-primario">
+          <svg class="icono" aria-hidden="true"><use href="#i-check"></use></svg> Guardar comida
+        </button>
+      </div>
+    </form>
+
+    <aside class="vista-previa solo-js" aria-label="Vista previa de la comida">
+      <p class="vista-previa-titulo">Así se verá en el menú</p>
+      <article class="plato plato-previa">
+        <div class="plato-foto">
+          <img data-prev-foto alt="" hidden>
+          <svg class="icono icono-grande" data-prev-foto-vacio aria-hidden="true"><use href="#i-camara"></use></svg>
+        </div>
+        <div class="plato-cuerpo">
+          <h2 class="plato-nombre es-placeholder" data-prev-nombre>Nombre de la comida</h2>
+          <ul class="chips chips-lectura" data-prev-chips></ul>
+        </div>
+        <span class="etiqueta etiqueta-precio" data-prev-precio>$0.00</span>
+      </article>
+    </aside>
+  </div>
+
+  {% if comida %}
+    <form method="post" action="{% url 'comedor:eliminar' comida.pk %}" class="zona-peligro"
+          onsubmit="return confirm('¿Eliminar {{ comida.nombre|escapejs }}?');">
+      {% csrf_token %}
+      <button type="submit" class="boton boton-peligro">
+        <svg class="icono" aria-hidden="true"><use href="#i-basura"></use></svg> Eliminar comida
+      </button>
+    </form>
+  {% endif %}
+{% endblock %}

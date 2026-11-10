@@ -1,0 +1,544 @@
+/* Estilos propios del área del comedor. Las variables vienen de static/css/base.css */
+
+/* ---------- Pizarrón (cabecera y login) ---------- */
+
+.cabecera,
+.login-pizarra {
+  background-color: var(--pizarra);
+  background-image:
+    radial-gradient(ellipse 60% 130% at 12% 0%, rgba(246, 244, 234, 0.1), transparent 60%),
+    radial-gradient(ellipse 50% 110% at 96% 100%, rgba(246, 244, 234, 0.07), transparent 60%);
+  color: var(--tiza);
+}
+
+.cabecera {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1rem 0.8rem 1.25rem;
+  border-bottom: 3px dashed rgba(246, 244, 234, 0.4);
+}
+
+.cabecera-marca { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+
+.cabecera-icono {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px dashed rgba(246, 244, 234, 0.55);
+  border-radius: 50%;
+}
+
+.cabecera-titulo { font-size: 1.5rem; }
+
+.nav-desplegable summary {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 10px;
+  list-style: none;
+  cursor: pointer;
+}
+.nav-desplegable summary::-webkit-details-marker { display: none; }
+.nav-desplegable summary:hover,
+.nav-desplegable[open] summary { background: rgba(246, 244, 234, 0.14); }
+.nav-desplegable summary:focus-visible { outline-color: var(--etiqueta); }
+
+.hamburguesa {
+  display: block;
+  width: 1.35rem;
+  height: 2px;
+  background: var(--tiza);
+  box-shadow: 0 -7px 0 var(--tiza), 0 7px 0 var(--tiza);
+}
+
+.nav-panel {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0.75rem;
+  z-index: 10;
+  display: grid;
+  min-width: 15rem;
+  padding: 0.4rem;
+  border-radius: 12px;
+  background: var(--papel);
+  color: var(--tinta);
+  box-shadow: 0 8px 24px rgba(23, 53, 43, 0.25);
+}
+
+.nav-panel a,
+.nav-panel button,
+.nav-pendiente {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.nav-panel a:hover,
+.nav-panel button:hover { background: var(--fondo); }
+.nav-pendiente { color: var(--tinta-suave); cursor: default; }
+
+/* ---------- Etiqueta de precio (el detalle que más se nota) ---------- */
+
+.etiqueta {
+  position: relative;
+  display: inline-block;
+  padding: 0.22rem 0.8rem 0.22rem 1.3rem;
+  background: var(--etiqueta);
+  color: var(--tinta);
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  clip-path: polygon(0.75rem 0, 100% 0, 100% 100%, 0.75rem 100%, 0 50%);
+}
+.etiqueta::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.7rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-top: -0.2rem;
+  border-radius: 50%;
+  background: var(--fondo);
+}
+
+.etiqueta-precio {
+  position: absolute;
+  top: 1.1rem;
+  right: 0;
+  font-size: 1.05rem;
+}
+
+/* ---------- Login ---------- */
+
+.pagina-login .pagina { max-width: 26rem; padding-top: 2rem; }
+
+.login-pizarra {
+  position: relative;
+  padding: 2rem 1.5rem 1.5rem;
+  border-radius: 14px;
+}
+.login-pizarra h1 { font-size: 2.6rem; }
+.login-pizarra p { margin: 0.6rem 0 0; max-width: 26ch; }
+
+.login-arte {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 6.5rem;
+  height: auto;
+}
+
+/* Los dibujos de gis se trazan solos, uno tras otro, una sola vez al cargar */
+.tiza { color: rgba(246, 244, 234, 0.82); }
+.tiza path,
+.tiza circle {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  animation: trazo 0.8s ease-out forwards;
+  animation-delay: calc(var(--d, 0s) + var(--i, 0) * 0.18s);
+}
+@keyframes trazo { to { stroke-dashoffset: 0; } }
+
+/* Si la página se recarga por un error, los dibujos ya aparecen completos */
+.con-error .tiza path,
+.con-error .tiza circle { animation: none; stroke-dashoffset: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tiza path,
+  .tiza circle { stroke-dashoffset: 0; }
+}
+
+.login-dibujos {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 2px dashed rgba(246, 244, 234, 0.35);
+}
+.login-dibujos svg { width: 3.6rem; height: 3.6rem; }
+
+.login-form { margin-top: 1.75rem; }
+.login-titulo { margin-bottom: 1.1rem; font-size: 1.6rem; }
+
+.login-form .errores-form { animation: sacudir 0.4s; }
+@keyframes sacudir {
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* Contraseña con botón para mostrarla */
+.campo-clave { position: relative; }
+.campo .campo-clave input { padding-right: 5.5rem; }
+.campo-ver {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  min-height: 2.2rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--pizarra);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+.campo-ver:hover { background: rgba(23, 53, 43, 0.08); }
+
+/* En pantallas anchas: pizarrón grande a la izquierda y el formulario a la derecha */
+@media (min-width: 52rem) {
+  .pagina-login .pagina {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 3.5rem;
+    align-items: center;
+    max-width: 62rem;
+    min-height: 100vh;
+    padding: 2rem 1.5rem;
+  }
+  .login-pizarra { padding: 2.75rem 2.5rem 2.25rem; min-height: 26rem; }
+  .login-pizarra h1 { font-size: 3.6rem; }
+  .login-pizarra p { margin-top: 0.9rem; font-size: 1.1rem; }
+  .login-arte { top: 2rem; right: 2rem; width: 8.5rem; }
+  .login-dibujos { margin-top: 2.5rem; }
+  .login-dibujos svg { width: 4.75rem; height: 4.75rem; }
+  .login-form { margin-top: 0; }
+}
+
+/* ---------- Inicio ---------- */
+
+.resumen-dia {
+  margin: 0 0 1.25rem;
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  line-height: 1.4;
+}
+
+.accesos { display: grid; gap: 0.9rem; margin: 0; padding: 0; list-style: none; }
+
+.acceso {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding: 1.1rem 1.15rem;
+  border: 2px dashed var(--borde-campo);
+  border-radius: 14px;
+  background: var(--papel);
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+
+a.acceso:hover {
+  border-color: var(--pizarra);
+  border-style: solid;
+  box-shadow: 0 6px 16px rgba(23, 53, 43, 0.12);
+  transform: translateY(-2px);
+}
+
+.acceso-icono {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: 50%;
+  background: var(--pizarra);
+  color: var(--tiza);
+}
+.acceso-icono .icono { width: 1.5rem; height: 1.5rem; }
+
+.acceso-cuerpo { flex: 1 1 12rem; min-width: 0; }
+.acceso .etiqueta { margin-left: auto; }
+
+.acceso-titulo {
+  display: block;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.acceso-texto { display: block; margin-top: 0.1rem; color: var(--tinta-suave); }
+
+.acceso-pendiente { border-color: var(--borde); background: transparent; color: var(--tinta-suave); }
+.acceso-pendiente .acceso-icono { background: var(--borde); color: var(--tinta-suave); }
+
+/* ---------- Ingredientes como etiquetas ---------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  background: #dcebe3;
+  color: var(--pizarra);
+  font-size: 0.92rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.chip-editable { padding: 0.2rem 0.25rem 0.2rem 0.9rem; font-size: 1rem; }
+.chip-editable button {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--pizarra);
+  cursor: pointer;
+}
+.chip-editable button:hover { background: rgba(23, 53, 43, 0.16); }
+.chip-editable .icono { width: 1rem; height: 1rem; }
+
+.chip-mas {
+  border: 1.5px dashed var(--borde-campo);
+  background: transparent;
+  color: var(--tinta-suave);
+  font-weight: 500;
+}
+
+.chip.nuevo { animation: aparece 0.2s ease-out; }
+@keyframes aparece {
+  from { opacity: 0; transform: scale(0.8); }
+}
+
+.chips-lectura .chip { padding: 0.15rem 0.65rem; font-size: 0.84rem; }
+
+.chips-editables { min-height: 2.4rem; margin-top: 0.2rem; }
+.chips-editables:empty::before {
+  content: "Todavía no hay ingredientes.";
+  align-self: center;
+  color: var(--tinta-suave);
+  font-size: 0.92rem;
+}
+
+/* ---------- Lista de comidas ---------- */
+
+.platos { margin: 0; padding: 0; list-style: none; }
+
+.plato {
+  position: relative;
+  display: grid;
+  grid-template-columns: 6rem 1fr;
+  gap: 1rem;
+  padding: 1.1rem 0;
+  border-bottom: 2px dashed var(--borde);
+}
+
+.plato-foto {
+  display: grid;
+  place-items: center;
+  width: 6rem;
+  height: 6rem;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--borde);
+  color: var(--tinta-suave);
+}
+.plato-foto img { width: 100%; height: 100%; object-fit: cover; }
+
+.plato-nombre { padding-right: 5.5rem; font-size: 1.2rem; }
+.plato-nombre.es-placeholder { color: var(--tinta-suave); font-weight: 400; font-style: italic; }
+
+/* Los ingredientes empiezan justo debajo de la etiqueta de precio */
+.plato .chips { margin-top: 0.55rem; }
+
+.plato-acciones { display: flex; gap: 1rem; margin-top: 0.4rem; }
+
+.enlace-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.5rem;
+  padding: 0 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--pizarra);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.enlace-accion .icono { width: 1.05em; height: 1.05em; }
+.enlace-peligro { color: var(--chile); }
+
+.vacio { padding: 2.5rem 0; color: var(--tinta-suave); }
+.vacio .icono-grande { margin-bottom: 0.75rem; }
+.vacio p { margin: 0 0 1rem; color: var(--tinta); font-family: var(--serif); font-size: 1.4rem; }
+
+.icono-grande { width: 2rem; height: 2rem; }
+
+/* ---------- Formulario de comida ---------- */
+
+.pagina-ancha .pagina { max-width: 62rem; }
+
+.form-layout { display: grid; gap: 1.5rem; }
+
+/* En celular la vista previa va arriba para ver cómo se arma la comida */
+.vista-previa { order: -1; }
+
+@media (min-width: 56rem) {
+  .form-layout { grid-template-columns: minmax(0, 1fr) 21rem; align-items: start; gap: 2rem; }
+  .vista-previa { order: 0; position: sticky; top: 1rem; }
+}
+
+.vista-previa {
+  padding: 1.1rem;
+  border: 2px dashed var(--borde-campo);
+  border-radius: 14px;
+  background: var(--papel);
+}
+.vista-previa-titulo { margin: 0 0 0.9rem; color: var(--tinta-suave); font-weight: 600; }
+.plato-previa { padding: 0; border-bottom: 0; }
+.plato-previa .etiqueta-precio { top: 0; }
+
+.campo-titulo { font-weight: 700; }
+
+.campo.campo-nombre input {
+  min-height: 3.3rem;
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+/* Foto: zona para tocar o arrastrar */
+.dropzone {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 11rem;
+  aspect-ratio: 16 / 9;
+  max-height: 16rem;
+  overflow: hidden;
+  border: 2px dashed var(--borde-campo);
+  border-radius: 14px;
+  background: var(--papel);
+  color: var(--tinta-suave);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.12s, background-color 0.12s;
+}
+.dropzone:hover,
+.dropzone.arrastrando { border-color: var(--pizarra); background: #e6f1ea; }
+.dropzone:has(+ input:focus-visible) { outline: 3px solid var(--foco); outline-offset: 2px; }
+.dropzone.tiene-foto { border-style: solid; border-color: var(--borde); }
+
+.dropzone-vacio { display: grid; justify-items: center; gap: 0.25rem; padding: 1rem; }
+.dropzone-titulo { color: var(--tinta); font-family: var(--serif); font-size: 1.25rem; font-weight: 700; }
+.dropzone-texto { font-size: 0.92rem; }
+
+.dropzone-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.dropzone-cambiar {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(22, 35, 30, 0.82);
+  color: var(--tiza);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.dropzone.tiene-foto .dropzone-cambiar { display: inline-flex; }
+
+/* Ingredientes */
+.ingrediente-entrada { display: flex; gap: 0.5rem; }
+.ingrediente-entrada input { flex: 1; min-width: 0; }
+
+.aviso-alerta { color: var(--chile); font-weight: 600; }
+
+/* Con JavaScript el cuadro de texto se esconde (sigue enviándose al guardar) */
+html.js .ingredientes-texto { display: none; }
+
+/* Precio: el campo es la propia etiqueta */
+.campo-precio .precio-etiqueta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  justify-self: start;
+  gap: 0.15rem;
+  padding: 0.55rem 1.4rem 0.55rem 2.1rem;
+  background: var(--etiqueta);
+  color: var(--tinta);
+  clip-path: polygon(1.1rem 0, 100% 0, 100% 100%, 1.1rem 100%, 0 50%);
+  transition: background-color 0.12s;
+}
+.campo-precio .precio-etiqueta::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.95rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: -0.25rem;
+  border-radius: 50%;
+  background: var(--fondo);
+}
+.campo-precio .precio-etiqueta:focus-within { background: #ffd54a; }
+
+.precio-signo { font-size: 1.9rem; font-weight: 800; }
+
+.campo .precio-etiqueta input {
+  width: 6.5rem;
+  min-height: 0;
+  padding: 0 0 0.1rem;
+  border: 0;
+  border-bottom: 3px solid rgba(22, 35, 30, 0.35);
+  border-radius: 0;
+  background: transparent;
+  font-size: 1.9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.campo .precio-etiqueta input::placeholder { color: rgba(22, 35, 30, 0.4); }
+.campo .precio-etiqueta input:focus { outline: 0; border-bottom-color: var(--pizarra); }
+.precio-etiqueta input::-webkit-outer-spin-button,
+.precio-etiqueta input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.zona-peligro {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 2px dashed var(--borde);
+}

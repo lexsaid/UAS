@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Entrar al comedor{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'comedor/comedor.css' %}">
+  <script src="{% static 'comedor/login.js' %}" defer></script>
+{% endblock %}
+{% block body_class %}pagina-login{% if form.errors %} con-error{% endif %}{% endblock %}
+
+{% block content %}
+  <section class="login-pizarra">
+    {# Dibujos como hechos con gis: cada trazo se dibuja solo al cargar la página #}
+    <svg class="login-arte tiza" viewBox="0 0 120 84" aria-hidden="true" fill="none" stroke="currentColor"
+         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle pathLength="1" style="--i:0" cx="60" cy="48" r="26"/>
+      <circle pathLength="1" style="--i:1" cx="60" cy="48" r="17"/>
+      <path pathLength="1" style="--i:2" d="M17 24v12a5 5 0 0 0 10 0V24M22 41v32"/>
+      <path pathLength="1" style="--i:3" d="M103 73V24c-7 4-9 14-9 24h9"/>
+      <path pathLength="1" style="--i:4" d="M52 8c-3 3 3 5 0 9"/>
+      <path pathLength="1" style="--i:5" d="M63 5c-3 3 3 5 0 9"/>
+    </svg>
+
+    <h1>Comedor</h1>
+    <p><span data-saludo>Hola</span>. Administra el menú del día y los pedidos de los lonches.</p>
+
+    <div class="login-dibujos" aria-hidden="true">
+      {# Cuenco #}
+      <svg class="tiza" viewBox="0 0 64 64" style="--d:0.9s" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path pathLength="1" style="--i:0" d="M8 30h48"/>
+        <path pathLength="1" style="--i:1" d="M10 30c0 14 9 24 22 24s22-10 22-24"/>
+        <path pathLength="1" style="--i:2" d="M24 58h16"/>
+        <path pathLength="1" style="--i:3" d="M24 12c-3 3 3 6 0 10"/>
+        <path pathLength="1" style="--i:4" d="M34 8c-3 3 3 6 0 10"/>
+        <path pathLength="1" style="--i:5" d="M44 12c-3 3 3 6 0 10"/>
+      </svg>
+      {# Torta #}
+      <svg class="tiza" viewBox="0 0 64 64" style="--d:1.4s" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path pathLength="1" style="--i:0" d="M10 30c0-11 10-18 22-18s22 7 22 18z"/>
+        <path pathLength="1" style="--i:1" d="M8 37l6 4 6-4 6 4 6-4 6 4 6-4 6 4 6-4"/>
+        <path pathLength="1" style="--i:2" d="M10 46h44v3a5 5 0 0 1-5 5H15a5 5 0 0 1-5-5z"/>
+      </svg>
+      {# Taza #}
+      <svg class="tiza" viewBox="0 0 64 64" style="--d:1.9s" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path pathLength="1" style="--i:0" d="M14 22h30v18a12 12 0 0 1-12 12h-6a12 12 0 0 1-12-12z"/>
+        <path pathLength="1" style="--i:1" d="M44 27h3a6 6 0 0 1 0 12h-3"/>
+        <path pathLength="1" style="--i:2" d="M23 8c-3 3 3 6 0 10"/>
+        <path pathLength="1" style="--i:3" d="M33 8c-3 3 3 6 0 10"/>
+      </svg>
+      {# Manzana #}
+      <svg class="tiza" viewBox="0 0 64 64" style="--d:2.4s" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path pathLength="1" style="--i:0" d="M32 20c-4-4-14-4-18 4-4 9 0 22 8 26 4 2 7 0 10 0s6 2 10 0c8-4 12-17 8-26-4-8-14-8-18-4z"/>
+        <path pathLength="1" style="--i:1" d="M32 20c0-5 2-9 6-11"/>
+        <path pathLength="1" style="--i:2" d="M36 11c3-3 8-2 9 2-4 2-8 1-9-2z"/>
+      </svg>
+    </div>
+  </section>
+
+  <form method="post" class="login-form" novalidate>
+    <h2 class="login-titulo">Inicia sesión</h2>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+
+    {% if form.non_field_errors %}
+      <div class="errores-form" role="alert">
+        {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="campo">
+      <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+      {{ form.username }}
+    </div>
+
+    <div class="campo">
+      <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+      <div class="campo-clave">
+        {{ form.password }}
+        <button type="button" class="campo-ver solo-js" data-ver-clave aria-pressed="false">Mostrar</button>
+      </div>
+      <p class="ayuda aviso-alerta" data-aviso-mayusculas role="status" hidden>Tienes las mayúsculas activadas.</p>
+    </div>
+
+    <button type="submit" class="boton boton-primario boton-ancho" data-entrar>Ingresar</button>
+  </form>
+{% endblock %}

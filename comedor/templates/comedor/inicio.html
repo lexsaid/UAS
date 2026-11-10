@@ -1,0 +1,46 @@
+{% extends "comedor/base_comedor.html" %}
+
+{% block title %}Inicio · Comedor{% endblock %}
+{% block titulo_pagina %}Inicio{% endblock %}
+
+{% block content %}
+  <p class="resumen-dia">
+    {% if total_comidas %}
+      Hay <strong>{{ total_comidas }} {% if total_comidas == 1 %}comida{% else %}comidas{% endif %}</strong>
+      guardadas en el menú del comedor.
+    {% else %}
+      Todavía no hay comidas guardadas en el menú del comedor.
+    {% endif %}
+  </p>
+
+  <ul class="accesos">
+    <li>
+      <a class="acceso" href="{% url 'comedor:lista' %}">
+        <span class="acceso-icono" aria-hidden="true"><svg class="icono"><use href="#i-cubiertos"></use></svg></span>
+        <span class="acceso-cuerpo">
+          <span class="acceso-titulo">Ver comedor</span>
+          <span class="acceso-texto">Revisa, edita o elimina las comidas guardadas.</span>
+        </span>
+        {% if total_comidas %}<span class="etiqueta">{{ total_comidas }} en el menú</span>{% endif %}
+      </a>
+    </li>
+    <li>
+      <a class="acceso" href="{% url 'comedor:agregar' %}">
+        <span class="acceso-icono" aria-hidden="true"><svg class="icono"><use href="#i-mas"></use></svg></span>
+        <span class="acceso-cuerpo">
+          <span class="acceso-titulo">Agregar comida</span>
+          <span class="acceso-texto">Suma una comida al menú permanente.</span>
+        </span>
+      </a>
+    </li>
+    <li>
+      <div class="acceso acceso-pendiente" aria-disabled="true">
+        <span class="acceso-icono" aria-hidden="true"><svg class="icono"><use href="#i-pedidos"></use></svg></span>
+        <span class="acceso-cuerpo">
+          <span class="acceso-titulo">Solicitudes de comida</span>
+          <span class="acceso-texto">Aquí verás los pedidos de los clientes. Aún no está disponible.</span>
+        </span>
+      </div>
+    </li>
+  </ul>
+{% endblock %}
