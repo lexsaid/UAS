@@ -1,0 +1,61 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% load static %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'alumnos/cuenta_regresiva.css' %}?v=4"><script src="{% static 'alumnos/cuenta_regresiva.js' %}?v=2" defer></script>{% endblock %}
+{% block title %}Inicio · Alumnos{% endblock %}
+{% block body_class %}pagina-tienda pagina-inicio{% endblock %}
+{% block content %}
+<h1 class="sr-only">Inicio</h1>
+<section class="inicio-horario-unificado" aria-labelledby="titulo-horario">
+  <div class="inicio-horario-datos">
+    <h2 id="titulo-horario">Horario de pedidos</h2>
+    <p class="inicio-horario-subtitulo">Para el siguiente día escolar.</p>
+    <div class="inicio-horas"><div><span>DESDE</span><strong>{{ horario.hora_inicio|time:"g:i" }} <small>{% if horario.hora_inicio.hour < 12 %}a. m.{% else %}p. m.{% endif %}</small></strong><p>Inicio del registro</p></div><span class="inicio-horas-puente" aria-hidden="true">→</span><div><span>HASTA</span><strong>{{ horario.hora_fin|time:"g:i" }} <small>{% if horario.hora_fin.hour < 12 %}a. m.{% else %}p. m.{% endif %}</small></strong><p>{% if horario.hora_fin < horario.hora_inicio %}Del día siguiente{% else %}Del mismo día{% endif %}</p></div></div>
+  </div>
+  <section class="inicio-cuenta{% if not cuenta.abierto %} esta-cerrado{% endif %}" data-cuenta-pedidos data-url="{% url 'alumnos:horario_pedidos' %}" aria-labelledby="titulo-cuenta">
+  <div class="cuenta-ilustracion" aria-hidden="true">
+    <svg class="reloj-arena" viewBox="0 0 120 144" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="60" cy="132" rx="36" ry="5" fill="currentColor" opacity=".08" stroke="none"/>
+      <path d="M30 16h60M30 124h60M36 18v20c0 16 17 24 24 32-7 8-24 16-24 32v20m48-104v20c0 16-17 24-24 32 7 8 24 16 24 32v20"/>
+      <path class="arena-superior" d="M42 39h36c-2 11-12 17-18 23-6-6-16-12-18-23Z" fill="currentColor" stroke="none"/>
+      <path class="arena-inferior" d="M42 115c1-12 11-19 18-24 7 5 17 12 18 24Z" fill="currentColor" stroke="none"/>
+      <path class="arena-flujo" d="M60 72v27" stroke-dasharray="2 5"/>
+      <path d="M43 24v10m34 72v8" opacity=".4"/>
+    </svg>
+  </div>
+  <div class="cuenta-contenido">
+    <h2 id="titulo-cuenta" data-cuenta-titulo>{% if cuenta.abierto %}Aún estás a tiempo{% else %}El tiempo para pedir terminó{% endif %}</h2>
+    <p class="cuenta-descripcion" data-cuenta-descripcion>{% if cuenta.abierto %}Te queda este tiempo para confirmar tu pedido.{% else %}El registro está cerrado. Podrás confirmar tu pedido en el siguiente horario de apertura.{% endif %}</p>
+    <div class="cuenta-reloj" role="timer" aria-live="off" aria-label="{% if cuenta.abierto %}Tiempo para confirmar{% else %}Registro cerrado. Sin tiempo disponible para pedir{% endif %}" data-cuenta-reloj>{{ cuenta.reloj }}</div>
+    <span class="cuenta-unidades">HORAS <span>·</span> MINUTOS <span>·</span> SEGUNDOS</span>
+    <p class="sr-only" role="status" data-cuenta-estado></p>
+    <noscript><p class="cuenta-descripcion">Tiempo calculado al abrir esta página. Activa JavaScript para verlo actualizarse.</p></noscript>
+  </div>
+</section>
+</section>
+<a class="inicio-historial-panel inicio-menu-panel inicio-tarjeta-enlace" href="{% url 'alumnos:menu' %}" aria-labelledby="titulo-menu">
+  <div class="inicio-menu-icono" aria-hidden="true"><svg class="dibujo-lineas plato-menu" viewBox="0 0 220 180" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="110" cy="100" rx="87" ry="68"/>
+  <circle pathLength="1" cx="110" cy="100" r="54"/>
+  <circle pathLength="1" cx="110" cy="100" r="43" style="--i:1"/>
+  <path pathLength="1" d="M24 57v25a7 7 0 0 0 14 0V57m-7 0v91M188 148V57c-11 9-15 22-15 40h15" style="--i:2"/>
+  <path class="vapor-plato" d="M94 31c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M110 27c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M126 31c-9-9 9-13 0-22"/>
+  <path pathLength="1" d="M92 104q18-21 36 0l-3 15H95Zm3-5 5-7m7 3 4-7m5 9 6-6" style="--i:3"/>
+</svg></div>
+  <div class="inicio-historial-texto"><h2 id="titulo-menu">Ver Menú</h2><p>Encuentra tu próximo lonche y agrega tus favoritos al carrito.</p></div>
+</a>
+<a class="inicio-historial-panel inicio-tarjeta-enlace" href="{% url 'alumnos:historial' %}" aria-labelledby="titulo-historial">
+  <div class="inicio-historial-icono" aria-hidden="true"><svg class="dibujo-lineas recibo-dibujo" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle class="orbita-reloj" cx="50" cy="50" r="44"/>
+  <path pathLength="1" d="M28 17l6 4 6-4 6 4 6-4 6 4 6-4 8 4v62l-8-4-6 4-6-4-6 4-6-4-6 4-6-4Z"/>
+  <path pathLength="1" style="--i:1" d="M38 34h24M38 44h17M38 54h24"/>
+  <path class="recibo-marca" pathLength="1" style="--i:2" d="m43 66 5 5 10-10"/>
+</svg></div>
+  <div class="inicio-historial-texto"><h2 id="titulo-historial">Ver Historial</h2><p>Revisa qué pediste y consulta si tu pedido fue aceptado.</p></div>
+</a>
+
+{{ cuenta|json_script:"estado-horario" }}
+{% endblock %}
+
+

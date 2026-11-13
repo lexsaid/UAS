@@ -1,0 +1,35 @@
+.inicio-cuenta {display:flex;align-items:center;justify-content:center;text-align:center;gap:1.8rem;margin:1.5rem 0 1rem;padding:1.8rem 2.4rem;border-top:1px solid #cbd8cd;border-bottom:1px solid #cbd8cd;background:linear-gradient(110deg,#e4ece1,#f3f5ea);border-radius:18px;color:var(--pizarra)}
+.cuenta-contenido {max-width:30rem}
+.inicio-horario-unificado {display:grid;grid-template-columns:1fr 1.15fr;align-items:center;margin:.75rem 0 1.3rem;background:#fffdf5;border:1px solid #dce2d5;border-radius:20px;overflow:hidden}
+.inicio-horario-datos {padding:2rem;text-align:center;min-width:0}
+.inicio-horario-datos h2 {font-size:1.7rem;color:var(--pizarra);margin:0}
+.inicio-horario-subtitulo {font-size:.85rem;color:var(--tinta-suave);margin:.5rem 0 1.6rem}
+.inicio-horario-unificado .inicio-horas {border:0;padding:0;justify-content:center;gap:1.4rem}
+.inicio-horario-unificado .inicio-cuenta {align-self:stretch;margin:0;padding:1.5rem;gap:.8rem;border:0;border-left:1px solid #ead8bd;border-radius:0;background:linear-gradient(110deg,#f9e7cc,#fff4e6)}
+.inicio-horario-unificado .cuenta-ilustracion {color:#b47932}
+.inicio-horario-unificado .cuenta-ilustracion {width:5rem}
+.inicio-horario-unificado .cuenta-contenido {max-width:19rem}
+.inicio-horario-unificado .cuenta-contenido h2 {font-size:1.35rem}
+.inicio-horario-unificado .cuenta-reloj {font-size:2.2rem}
+@media(max-width:55rem){.inicio-horario-unificado{grid-template-columns:1fr}.inicio-horario-datos{padding:1.5rem}.inicio-horario-unificado .inicio-cuenta{border-left:0;border-top:1px solid #dce2d5}.inicio-horario-unificado .cuenta-contenido{max-width:25rem}}
+.cuenta-ilustracion {width:7.5rem;flex:none;color:#8b7733}
+.reloj-arena {display:block;width:100%;overflow:visible}
+.cuenta-etiqueta {font-size:.62rem;letter-spacing:.18em;margin:0 0 .5rem;color:#657760}
+.cuenta-contenido h2 {font-size:1.7rem;line-height:1.2;margin:0}
+.cuenta-descripcion {font-size:.85rem;line-height:1.6;margin:.6rem 0;color:var(--tinta-suave)}
+.cuenta-reloj {font-family:var(--sans);font-variant-numeric:tabular-nums;font-weight:600;font-size:2.7rem;letter-spacing:.07em;line-height:1.2;margin-top:.8rem}
+.cuenta-unidades {display:block;font-size:.55rem;letter-spacing:.15em;margin-top:.35rem;color:#647360}
+.cuenta-unidades span {margin:0 .55rem;color:#a5b29d}
+.arena-superior {transform-origin:60px 62px;animation:arena-vaciar 5s linear infinite}
+.arena-inferior {transform-origin:60px 115px;animation:arena-llenar 5s linear infinite}
+.arena-flujo {animation:arena-caer .8s linear infinite}
+.inicio-cuenta.esta-cerrado {background:linear-gradient(110deg,#f4eddb,#f8f6ef);border-color:#ded5bf}
+.inicio-horario-unificado .inicio-cuenta.esta-cerrado {background:linear-gradient(110deg,#f9e7cc,#fff4e6);border-color:#ead8bd}
+.esta-cerrado .cuenta-etiqueta,.esta-cerrado .cuenta-ilustracion {color:#947533}
+.esta-cerrado .arena-superior,.esta-cerrado .arena-flujo {animation:none;opacity:0}
+.esta-cerrado .arena-inferior {animation:none}
+@keyframes arena-vaciar {from{transform:scaleY(1)}to{transform:scaleY(.08)}}
+@keyframes arena-llenar {from{transform:scaleY(.08)}to{transform:scaleY(1)}}
+@keyframes arena-caer {to{stroke-dashoffset:-14}}
+@media(max-width:40rem){.inicio-cuenta{flex-direction:column;padding:1.3rem 1rem;gap:.7rem}.cuenta-ilustracion{width:4.7rem}.cuenta-contenido{min-width:0}.cuenta-contenido h2{font-size:1.35rem}.cuenta-reloj{font-size:2rem;letter-spacing:.03em}.cuenta-descripcion{font-size:.78rem}.cuenta-unidades{font-size:.48rem;letter-spacing:.07em}.cuenta-unidades span{margin:0 .2rem}}
+@media(prefers-reduced-motion:reduce){.reloj-arena *{animation:none!important}}

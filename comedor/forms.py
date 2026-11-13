@@ -1,10 +1,27 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import Comida, separar_ingredientes
+from .models import Comida, HorarioPedidos, separar_ingredientes
 
 MAX_INGREDIENTES = 30
 MAX_LARGO_INGREDIENTE = 60
+
+
+class HorarioPedidosForm(forms.ModelForm):
+    hora_inicio = forms.TimeField(label='Inicio del registro', input_formats=['%H:%M'],
+                                  widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'step': '60'}))
+    hora_fin = forms.TimeField(label='Fin del registro', input_formats=['%H:%M'],
+                               widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'step': '60'}))
+
+    class Meta:
+        model = HorarioPedidos
+        fields = ['hora_inicio', 'hora_fin']
+
+    def clean(self):
+        datos = super().clean()
+        if datos.get('hora_inicio') is not None and datos.get('hora_inicio') == datos.get('hora_fin'):
+            self.add_error('hora_fin', 'La hora de fin debe ser distinta de la hora de inicio.')
+        return datos
 
 
 class LoginComedorForm(AuthenticationForm):

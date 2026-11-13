@@ -27,3 +27,24 @@ Para usar el mismo diseno en otras apps: {% extends "base.html" %} (templates/ba
 Las fotos subidas se guardan en media/ (no se sube a git). Hace falta Pillow (ya esta en requirements.txt).
 
 Pruebas: python manage.py test comedor
+
+--- Área de alumnos ---
+
+Login: http://localhost:8000/alumnos/login/
+Registro: http://localhost:8000/alumnos/registro/
+
+Incluye registro, inicio de sesión, menú, carrito y pedidos con comprobante e historial.
+El menú usa las comidas del comedor. Solo se pueden confirmar pedidos dentro del horario establecido; fuera de ese horario se bloquea el botón de confirmación y el carrito se conserva.
+Para ampliar o modificar ese horario, entra en Configuración desde el menú desplegable del comedor y guarda las nuevas horas de inicio y fin.
+La revisión de pedidos y los motivos de rechazo quedan pendientes de integrar.
+
+nota: ya hay un usuario registrado que servira como pruebas correo: santiago@gmai.com y contraseña: santiago
+
+Para iniciar con Docker:
+
+```powershell
+docker compose up --build -d
+docker compose exec web python manage.py migrate
+```
+
+Para arranques posteriores: `docker compose up -d`.

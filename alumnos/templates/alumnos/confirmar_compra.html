@@ -1,0 +1,65 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% load static %}
+{% block title %}Confirmar Pedido · Alumnos{% endblock %}
+{% block titulo_barra %}Confirmar Pedido{% endblock %}
+{% block body_class %}pagina-tienda{% endblock %}
+{% block extra_head %}{{ block.super }}<script src="{% static 'alumnos/comprobante.js' %}?v=20261113-horario" defer></script>{% endblock %}
+{% block content %}
+{% with titulo='Confirmar Pedido' descripcion='Revisa el total y agrega tu comprobante de pago.' paso='03' etapa='CONFIRMA TU PEDIDO' %}
+<section class="encabezado-pedido encabezado-con-pasos encabezado-solo-pasos">
+  <h1 class="sr-only">{{ titulo }}</h1>
+  <div class="encabezado-ilustracion" aria-hidden="true"><svg class="dibujo-lineas cuenco-menu" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="50" cy="57" rx="44" ry="36"/>
+  <path pathLength="1" d="M18 45h64M21 45c0 21 12 34 29 34s29-13 29-34"/>
+  <path pathLength="1" style="--i:1" d="M39 84h22M25 54h50"/>
+  <path class="vapor-plato" d="M37 33c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M50 29c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M63 33c-9-9 9-13 0-22"/>
+</svg></div>
+  <ol class="pedido-pasos" aria-label="Progreso del pedido">
+    <li class="{% if paso == '01' %}paso-actual{% else %}paso-completo{% endif %}" {% if paso == '01' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">{% if paso == '01' %}1{% else %}✓{% endif %}</span><span>Elige</span></li>
+    <li class="{% if paso == '02' %}paso-actual{% elif paso == '03' %}paso-completo{% endif %}" {% if paso == '02' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">{% if paso == '03' %}✓{% else %}2{% endif %}</span><span>Revisa</span></li>
+    <li class="{% if paso == '03' %}paso-actual{% endif %}" {% if paso == '03' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">3</span><span>Confirma</span></li>
+  </ol>
+  <div class="encabezado-ilustracion" aria-hidden="true"><svg class="dibujo-lineas plato-menu" viewBox="0 0 220 180" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="110" cy="100" rx="87" ry="68"/>
+  <circle pathLength="1" cx="110" cy="100" r="54"/>
+  <circle pathLength="1" cx="110" cy="100" r="43" style="--i:1"/>
+  <path pathLength="1" d="M24 57v25a7 7 0 0 0 14 0V57m-7 0v91M188 148V57c-11 9-15 22-15 40h15" style="--i:2"/>
+  <path class="vapor-plato" d="M94 31c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M110 27c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M126 31c-9-9 9-13 0-22"/>
+  <path pathLength="1" d="M92 104q18-21 36 0l-3 15H95Zm3-5 5-7m7 3 4-7m5 9 6-6" style="--i:3"/>
+</svg></div>
+</section>
+{% endwith %}
+<form id="confirmar-compra" method="post" enctype="multipart/form-data">
+  {% csrf_token %}{{ form.resumen }}{{ form.numero }}
+  {% if form.errors %}<div class="compra-errores" role="alert"><strong>Revisa lo siguiente:</strong>{{ form.non_field_errors }}{{ form.comprobante.errors }}{{ form.resumen.errors }}{{ form.numero.errors }}</div>{% endif %}
+  <div class="confirmacion-contenido">
+
+    <div class="seleccion-compra">
+      <section class="confirmacion-panel"><p class="sobretexto nota-kicker">01 · TU PEDIDO</p><h2>Todo en orden</h2><ul class="confirmacion-lista">{% for item in items %}<li><span><b>{{ item.cantidad }} ×</b> {{ item.comida.nombre }}</span><strong>${{ item.subtotal|floatformat:2 }}</strong></li>{% endfor %}<li class="confirmacion-suma"><span>Total · {{ cantidad_carrito }} alimento{{ cantidad_carrito|pluralize:"s" }}</span><strong>${{ total_carrito|floatformat:2 }} MXN</strong></li></ul></section>
+      <section class="confirmacion-panel"><p class="sobretexto nota-kicker">02 · COMPROBANTE DE PAGO</p><h2>Agrega tu comprobante</h2><p class="ayuda" id="comprobante-ayuda">Una foto clara o un PDF donde se vean el monto, la fecha y la referencia. JPG, PNG, WebP o PDF; máximo 5 MB.</p>
+        <div class="comprobante-carga"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 4h14l10 10v30H10V4h4m14 0v12h10M24 35V22m-6 6 6-6 6 6"/></svg><label for="id_comprobante">Selecciona tu archivo</label>{{ form.comprobante }}<p data-archivo-nombre aria-live="polite">Aún no has seleccionado un comprobante.</p><img data-comprobante-previa alt="Vista previa del comprobante seleccionado" hidden></div>
+        <p class="confirmacion-nota">El comedor revisará el comprobante. Adjuntarlo no marca el pago como verificado.</p>
+      </section>
+    </div>
+  </div>
+</form>
+<div class="tienda-barra">
+  <a class="tienda-volver" href="{% url 'alumnos:carrito' %}"><span aria-hidden="true">←</span> Volver</a>
+  <p class="horario-pedidos-aviso" id="aviso-horario-pedidos" role="status" aria-live="polite"
+     data-horario-aviso data-url="{% url 'alumnos:horario_pedidos' %}"
+     data-abierto="{{ estado_horario.abierto|yesno:'true,false' }}"
+     {% if estado_horario.abierto %}hidden{% endif %}>
+    El horario para finalizar pedidos está cerrado. Tu carrito se conserva; regresa durante el horario de pedidos para confirmar tu compra.
+  </p>
+  <div class="tienda-resumen"><span>Total del pedido</span><strong>${{ total_carrito|floatformat:2 }}</strong></div>
+  <button class="boton boton-primario carrito-enlace" type="submit" form="confirmar-compra"
+          aria-describedby="aviso-horario-pedidos" {% if not estado_horario.abierto %}disabled{% endif %}>
+    Confirmar Pedido <span aria-hidden="true">→</span>
+  </button>
+</div>
+{% endblock %}
+

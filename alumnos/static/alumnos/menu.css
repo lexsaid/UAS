@@ -1,0 +1,39 @@
+/* Presentación exclusiva del catálogo de alumnos. */
+.pagina-menu .tienda-aviso {top:5.5rem}
+.pagina-menu .menu-catalogo-intro {display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:2rem 0 1.4rem}
+.menu-catalogo-intro h2 {font-size:1.8rem;color:var(--pizarra);margin:0}
+.menu-catalogo-intro p {font-size:.85rem;color:var(--tinta-suave);margin:.35rem 0 0}
+.menu-catalogo-intro>span {font-size:.75rem;color:#536954;padding:.55rem .9rem;border:1px solid #cdd9c8;border-radius:30px;white-space:nowrap;background:#f5f7ef}
+.pagina-menu .catalogo-comidas {grid-template-columns:repeat(3,minmax(0,1fr));gap:1.6rem;margin-bottom:1rem}
+.pagina-menu .producto {padding:.65rem;background:#fffef9;border:1px solid #d4ded2;border-radius:24px;box-shadow:0 6px 22px #17352b07;transition:border-color .2s,box-shadow .2s,transform .2s}
+.pagina-menu .producto:hover {transform:translateY(-3px);box-shadow:0 12px 28px #17352b14;border-color:#a8bf9e}
+.pagina-menu .producto-foto {aspect-ratio:16/9;border-radius:17px;background:#e5ecdd}
+.pagina-menu .producto-foto>img {object-fit:cover}
+.pagina-menu .foto-alternativa {background:radial-gradient(ellipse at center,#f9f5df,#e3ebd9);color:#698064}
+.pagina-menu .foto-alternativa .plato-menu {width:9rem}
+.pagina-menu .foto-alternativa>span {font-size:.7rem;letter-spacing:.03em}
+.pagina-menu .producto-info {padding:1.3rem .9rem .5rem}
+.menu-producto-detalles {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);align-items:start;text-align:center;gap:1rem;margin-bottom:1.3rem}
+.menu-producto-titulo {min-width:0;padding-top:.1rem}
+.menu-producto-ingredientes {min-width:0;padding-left:1rem;border-left:1px solid #dde4d6}
+.pagina-menu .menu-producto-titulo h3 {font-size:1.8rem;line-height:1.15;margin:0;color:var(--pizarra);min-width:0}
+.pagina-menu .producto-precio {font-variant-numeric:tabular-nums;box-shadow:0 3px 10px #17352b14}
+.pagina-menu .producto-subtitulo {margin:0 0 .55rem;font-size:.6rem;letter-spacing:.14em;color:#6e7b68}
+.pagina-menu .producto .ingredientes {justify-content:center;gap:.4rem;margin:0}
+.pagina-menu .producto .ingredientes li {padding:.3rem .65rem;background:#eef2e8;color:#51664d;font-size:.76rem;line-height:1.4;border-radius:7px}
+.pagina-menu .producto-pie {border-top:1px solid #e5e9df;padding-top:.85rem}
+.pagina-menu .producto-seleccion {display:flex;align-items:center;justify-content:center;text-align:center;gap:.45rem;font-size:.74rem;color:#73806c;margin:0 0 .8rem}
+.pagina-menu .producto-seleccion::before {content:'';width:.4rem;height:.4rem;border-radius:50%;background:#b7c3ad;flex:none}
+.pagina-menu .tiene-seleccion {border-color:#789b6d;box-shadow:0 0 0 1px #789b6d}
+.pagina-menu .tiene-seleccion .producto-seleccion {color:#345c36;font-weight:600}
+.pagina-menu .tiene-seleccion .producto-seleccion::before {background:#4f8245;box-shadow:0 0 0 3px #e1edda}
+.pagina-menu .agregar-comida {display:flex;align-items:center;justify-content:center;gap:.65rem;min-height:3rem;border-radius:12px;font-size:.9rem;background:var(--pizarra);transition:background .2s}
+.pagina-menu .agregar-comida:hover {background:#2d5540}
+.pagina-menu .agregar-comida>span {display:grid;place-items:center;width:1.6rem;height:1.6rem;border-radius:50%;background:#ffffff18;font-size:1.15rem}
+.pagina-menu .menu-nota {text-align:center;color:var(--tinta-suave);font-size:.76rem;line-height:1.6;margin:1.4rem 0}
+.pagina-menu .catalogo-comidas>.vacio {grid-column:1/-1;padding:3rem 1.5rem;border:1px dashed #b7c8b0;background:#fffef8;border-radius:20px}
+@media(max-width:60rem){.pagina-menu .catalogo-comidas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:45rem){.pagina-menu .catalogo-comidas{gap:1rem}.pagina-menu .producto-info{padding:1rem .5rem .4rem}.pagina-menu .menu-producto-titulo h3{font-size:1.4rem}.menu-producto-detalles{gap:.7rem}.menu-producto-ingredientes{padding-left:.7rem}}
+@media(max-width:36rem){.pagina-menu .catalogo-comidas{grid-template-columns:1fr}.pagina-menu .menu-catalogo-intro{margin:1.4rem 0 1rem}.menu-catalogo-intro h2{font-size:1.45rem}.menu-catalogo-intro>span{font-size:.65rem;padding:.45rem .7rem}.pagina-menu .producto-info{padding:1.1rem .7rem .5rem}.pagina-menu .menu-producto-titulo h3{font-size:1.65rem}}
+@media(prefers-reduced-motion:reduce){.pagina-menu .producto,.pagina-menu .producto-foto>img,.pagina-menu .agregar-comida{transition:none}.pagina-menu .producto:hover,.pagina-menu .producto:hover .producto-foto>img{transform:none}}
+@media(max-width:23rem){.menu-producto-detalles{grid-template-columns:1fr}.menu-producto-ingredientes{border-left:0;padding-left:0}}

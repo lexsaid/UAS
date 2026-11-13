@@ -1,0 +1,29 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% block title %}Historial · Alumnos{% endblock %}
+{% block titulo_barra %}Historial{% endblock %}
+{% block body_class %}pagina-tienda pagina-pedidos{% endblock %}
+{% block content %}
+<h1 class="sr-only">Historial de pedidos</h1>
+<div class="historial-franja"><div class="historial-icono"><svg class="dibujo-lineas recibo-dibujo" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <circle class="orbita-reloj" cx="50" cy="50" r="44"/>
+  <path pathLength="1" d="M28 17l6 4 6-4 6 4 6-4 6 4 6-4 8 4v62l-8-4-6 4-6-4-6 4-6-4-6 4-6-4Z"/>
+  <path pathLength="1" style="--i:1" d="M38 34h24M38 44h17M38 54h24"/>
+  <path class="recibo-marca" pathLength="1" style="--i:2" d="m43 66 5 5 10-10"/>
+</svg></div><div class="historial-linea" aria-hidden="true"></div><span>{{ compras|length }} pedido{{ compras|length|pluralize:"s" }}</span></div>
+<div class="historial-lista">
+{% for compra in compras %}
+<article class="historial-ticket" aria-label="Pedido {{ compra.folio }}">
+  <div class="historial-ticket-cabecera"><h2>{{ compra.folio }}</h2><time datetime="{{ compra.creada|date:'c' }}"><span>{{ compra.creada|date:"d/m/Y" }}</span><span class="historial-ticket-hora">{{ compra.creada|date:"H:i" }} h</span></time></div>
+  <div class="historial-ticket-cuerpo">
+    <p class="historial-ticket-total"><span>Total del pedido</span><strong>${{ compra.total|floatformat:2 }} <small>MXN</small></strong></p>
+    <div class="historial-ticket-pie"><span class="historial-ticket-estado estado-{{ compra.estado_aceptacion }}"><span aria-hidden="true"></span>{{ compra.get_estado_aceptacion_display }}</span><a class="historial-ticket-ver" href="{% url 'alumnos:compra_realizada' compra.numero %}" aria-label="Ver pedido {{ compra.folio }}">Ver</a></div>
+  </div>
+</article>
+{% empty %}
+<section class="tarjeta vacio"><h2>Aún no hay pedidos para mostrar</h2><p>Cuando confirmes tu primera compra, aparecerá aquí.</p><a class="boton boton-primario" href="{% url 'alumnos:menu' %}">Ver Menú</a></section>
+{% endfor %}
+</div>
+<div class="tienda-barra"><a class="tienda-volver" href="{% url 'alumnos:inicio' %}"><span aria-hidden="true">←</span> Volver</a></div>
+{% endblock %}
+
+

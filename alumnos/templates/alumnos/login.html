@@ -1,0 +1,32 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'comedor/comedor.css' %}">{{ block.super }}{% endblock %}
+{% block title %}Ingresar · Alumnos{% endblock %}
+{% block body_class %}alumnos-acceso{% endblock %}
+{% block content %}
+<section class="pizarra bienvenida">
+  <p class="sobretexto firma-institucion"><span aria-hidden="true"></span>UAS · UAZ<span aria-hidden="true"></span></p>
+  <h1>Comedor</h1>
+  <h2 class="saludo-login">¡Qué gusto verte!</h2>
+  <p>Consulta las comidas del comedor de la Unidad Académica de Secundaria.</p>
+  {% include "_alimentos_login.html" %}
+</section>
+<section class="tarjeta">
+  <h2>Inicia sesión</h2><p class="ayuda introduccion">Ingresa con el correo que registraste.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="errores-form" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+    <div class="campo">
+      {{ field.label_tag }}
+      {{ field }}
+      {% if field.help_text %}<div class="ayuda" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</div>{% endif %}
+      {% if field.errors %}<div role="alert">{{ field.errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <button class="boton boton-primario boton-ancho" type="submit">Ingresar</button>
+  </form>
+  <p class="registro-enlace">¿Todavía no tienes cuenta?</p>
+  <a class="boton boton-secundario boton-ancho" href="{% url 'alumnos:registro' %}">Registrarse</a>
+</section>
+{% endblock %}

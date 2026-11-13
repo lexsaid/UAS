@@ -1,0 +1,79 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% load static %}
+{% block title %}Menú · Alumnos{% endblock %}
+{% block titulo_barra %}Menú{% endblock %}
+{% block body_class %}pagina-tienda pagina-menu{% endblock %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'alumnos/menu.css' %}?v=4"><script src="{% static 'alumnos/carrito.js' %}?v=2" defer></script>{% endblock %}
+{% block content %}
+{% with titulo='Nuestro menú' descripcion='Elige tus favoritos. Nosotros los preparamos.' paso='01' etapa='ELIGE TUS ALIMENTOS' %}
+<section class="encabezado-pedido encabezado-con-pasos encabezado-solo-pasos">
+  <h1 class="sr-only">{{ titulo }}</h1>
+  <div class="encabezado-ilustracion" aria-hidden="true"><svg class="dibujo-lineas cuenco-menu" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="50" cy="57" rx="44" ry="36"/>
+  <path pathLength="1" d="M18 45h64M21 45c0 21 12 34 29 34s29-13 29-34"/>
+  <path pathLength="1" style="--i:1" d="M39 84h22M25 54h50"/>
+  <path class="vapor-plato" d="M37 33c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M50 29c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M63 33c-9-9 9-13 0-22"/>
+</svg></div>
+  <ol class="pedido-pasos" aria-label="Progreso del pedido">
+    <li class="{% if paso == '01' %}paso-actual{% else %}paso-completo{% endif %}" {% if paso == '01' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">{% if paso == '01' %}1{% else %}✓{% endif %}</span><span>Elige</span></li>
+    <li class="{% if paso == '02' %}paso-actual{% elif paso == '03' %}paso-completo{% endif %}" {% if paso == '02' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">{% if paso == '03' %}✓{% else %}2{% endif %}</span><span>Revisa</span></li>
+    <li class="{% if paso == '03' %}paso-actual{% endif %}" {% if paso == '03' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">3</span><span>Confirma</span></li>
+  </ol>
+  <div class="encabezado-ilustracion" aria-hidden="true"><svg class="dibujo-lineas plato-menu" viewBox="0 0 220 180" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="110" cy="100" rx="87" ry="68"/>
+  <circle pathLength="1" cx="110" cy="100" r="54"/>
+  <circle pathLength="1" cx="110" cy="100" r="43" style="--i:1"/>
+  <path pathLength="1" d="M24 57v25a7 7 0 0 0 14 0V57m-7 0v91M188 148V57c-11 9-15 22-15 40h15" style="--i:2"/>
+  <path class="vapor-plato" d="M94 31c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M110 27c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M126 31c-9-9 9-13 0-22"/>
+  <path pathLength="1" d="M92 104q18-21 36 0l-3 15H95Zm3-5 5-7m7 3 4-7m5 9 6-6" style="--i:3"/>
+</svg></div>
+</section>
+{% endwith %}
+<div class="menu-catalogo-intro"><div><h2>¿Qué se te antoja?</h2><p>Arma tu lonche, a tu gusto.</p></div><span>{{ comidas|length }} {% if comidas|length == 1 %}opción{% else %}opciones{% endif %}</span></div>
+<p class="menu-nota">Cada clic agrega una unidad. Puedes ajustar las cantidades en tu carrito.</p>
+<div class="tienda-aviso" data-carrito-aviso role="status" aria-live="polite" hidden></div>
+<ul class="catalogo-comidas">
+{% for comida in comidas %}
+  <li class="producto{% if comida.en_carrito %} tiene-seleccion{% endif %}" id="comida-{{ comida.pk }}">
+    <div class="producto-foto">
+      <div class="foto-alternativa" aria-hidden="true"><svg class="dibujo-lineas plato-menu" viewBox="0 0 220 180" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="110" cy="100" rx="87" ry="68"/>
+  <circle pathLength="1" cx="110" cy="100" r="54"/>
+  <circle pathLength="1" cx="110" cy="100" r="43" style="--i:1"/>
+  <path pathLength="1" d="M24 57v25a7 7 0 0 0 14 0V57m-7 0v91M188 148V57c-11 9-15 22-15 40h15" style="--i:2"/>
+  <path class="vapor-plato" d="M94 31c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M110 27c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M126 31c-9-9 9-13 0-22"/>
+  <path pathLength="1" d="M92 104q18-21 36 0l-3 15H95Zm3-5 5-7m7 3 4-7m5 9 6-6" style="--i:3"/>
+</svg><span>Preparado en el comedor</span></div>
+      {% if comida.imagen %}<img src="{{ comida.imagen.url }}" alt="{{ comida.nombre }}" loading="lazy" data-foto-comida>{% endif %}
+      <span class="producto-numero" aria-hidden="true">{% if forloop.counter < 10 %}0{% endif %}{{ forloop.counter }}</span>
+      <span class="producto-precio" aria-label="Precio por unidad: ${{ comida.precio|floatformat:2 }} MXN">${{ comida.precio|floatformat:2 }}</span>
+    </div>
+    <div class="producto-info">
+    <div class="menu-producto-detalles">
+      <div class="menu-producto-titulo"><h3>{{ comida.nombre }}</h3></div>
+      <div class="menu-producto-ingredientes"><p class="producto-subtitulo">INGREDIENTES</p><ul class="ingredientes">{% for ingrediente in comida.ingredientes_lista %}<li>{{ ingrediente }}</li>{% endfor %}</ul></div>
+    </div>
+    <div class="producto-pie">
+      <p class="producto-seleccion" data-seleccion="{{ comida.pk }}">{% if comida.en_carrito %}{{ comida.en_carrito }} en tu carrito{% else %}Elige para tu lonche{% endif %}</p>
+      <form method="post" action="{% url 'alumnos:agregar_carrito' comida.pk %}" data-agregar-carrito data-comida="{{ comida.pk }}">
+        {% csrf_token %}<button class="boton boton-primario boton-ancho agregar-comida" type="submit" aria-label="Agregar al carrito: {{ comida.nombre }}"><span aria-hidden="true">＋</span> Agregar al carrito</button>
+      </form>
+    </div></div>
+  </li>
+{% empty %}
+  <li class="tarjeta vacio"><h2>El menú está por llegar</h2><p>El comedor todavía no ha agregado comidas. Vuelve a consultar más tarde.</p></li>
+{% endfor %}
+</ul>
+<div class="tienda-barra">
+  <a class="tienda-volver" href="{% url 'alumnos:inicio' %}"><span aria-hidden="true">←</span> Volver</a>
+  <div class="tienda-resumen"><span>Tu selección</span><strong>$<span data-carrito-total>{{ total_carrito|floatformat:2 }}</span></strong></div>
+  <a class="boton boton-primario carrito-enlace" href="{% url 'alumnos:carrito' %}">Ver Carrito <span class="carrito-contador" data-carrito-contador title="Unidades seleccionadas">{{ cantidad_carrito }}</span><span aria-hidden="true">→</span></a>
+</div>
+{% endblock %}
+

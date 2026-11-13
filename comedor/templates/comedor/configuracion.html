@@ -1,0 +1,46 @@
+{% extends "comedor/base_comedor.html" %}
+{% block title %}Configuración · Comedor{% endblock %}
+{% block titulo_pagina %}Configuración{% endblock %}
+{% block extra_head %}
+{{ block.super }}
+<style>
+.configuracion-horario {overflow:hidden;background:var(--papel);border:1px solid var(--borde);border-radius:20px;box-shadow:0 8px 24px #17352b0a}
+.configuracion-presentacion {display:flex;align-items:center;gap:1.2rem;padding:1.8rem 2rem;background:#e8efe5;border-bottom:1px solid #d3dfcf;color:var(--pizarra)}
+.configuracion-presentacion svg {width:3.8rem;flex:none;color:#657e51}
+.configuracion-presentacion h2 {font-size:1.8rem;margin:0}
+.configuracion-presentacion p {margin:.5rem 0 0;line-height:1.6;color:var(--tinta-suave)}
+.configuracion-horario form {padding:2rem}
+.configuracion-horas {display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.configuracion-horas input {font-variant-numeric:tabular-nums;font-size:1.4rem;background:#fafbf8}
+.configuracion-nota {padding:1rem 1.2rem;background:#fcf5de;border-left:3px solid var(--etiqueta);border-radius:8px;font-size:.9rem;line-height:1.7}
+.configuracion-zona {font-size:.8rem;color:var(--tinta-suave)}
+.configuracion-acciones {display:flex;justify-content:space-between;gap:1rem;margin-top:1.8rem;padding-top:1.3rem;border-top:1px solid var(--borde)}
+@media(max-width:36rem){.configuracion-presentacion{padding:1.3rem;gap:.8rem}.configuracion-presentacion h2{font-size:1.5rem}.configuracion-presentacion svg{width:3rem}.configuracion-horario form{padding:1.25rem}.configuracion-horas{grid-template-columns:1fr;gap:.5rem}.configuracion-acciones{flex-wrap:wrap}}
+</style>
+{% endblock %}
+{% block content %}
+<section class="configuracion-horario" aria-labelledby="titulo-horario">
+  <div class="configuracion-presentacion">
+    <svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="32" cy="32" r="25"/><path d="M32 17v15l10 6"/></svg>
+    <div><h2 id="titulo-horario">Horario de pedidos</h2><p>Define las horas de registro de pedidos de los alumnos.</p></div>
+  </div>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="errores-form" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="configuracion-horas">
+      {% for field in form %}
+      <div class="campo">
+        {{ field.label_tag }}{{ field }}
+        {% if field.errors %}<div class="errores-form" role="alert">{{ field.errors }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <p class="configuracion-nota">Si la hora de fin es anterior a la de inicio, el registro termina al día siguiente. Por ejemplo: de 15:00 a 03:00.</p>
+    <p class="configuracion-zona">Este horario se muestra a los alumnos. Fuera de él podrán preparar su carrito, pero no confirmar pedidos.</p>
+    <div class="configuracion-acciones">
+      <a class="boton boton-secundario" href="{% url 'comedor:inicio' %}">Volver</a>
+      <button class="boton boton-primario" type="submit">Guardar horario</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

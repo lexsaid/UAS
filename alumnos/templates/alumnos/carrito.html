@@ -1,0 +1,109 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% load static %}
+{% block title %}Mi carrito · Alumnos{% endblock %}
+{% block titulo_barra %}Mi carrito{% endblock %}
+{% block body_class %}pagina-tienda{% endblock %}
+{% block extra_head %}{{ block.super }}<script src="{% static 'alumnos/carrito.js' %}" defer></script><script src="{% static 'alumnos/carrito_edicion.js' %}" defer></script>{% endblock %}
+{% block content %}
+{% with titulo='Tu carrito' descripcion='Revisa tus alimentos y ajusta las cantidades.' paso='02' etapa='REVISA TU SELECCIÓN' %}
+<section class="encabezado-pedido encabezado-con-pasos encabezado-solo-pasos">
+  <h1 class="sr-only">{{ titulo }}</h1>
+  <div class="encabezado-ilustracion" aria-hidden="true"><svg class="dibujo-lineas cuenco-menu" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="50" cy="57" rx="44" ry="36"/>
+  <path pathLength="1" d="M18 45h64M21 45c0 21 12 34 29 34s29-13 29-34"/>
+  <path pathLength="1" style="--i:1" d="M39 84h22M25 54h50"/>
+  <path class="vapor-plato" d="M37 33c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M50 29c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M63 33c-9-9 9-13 0-22"/>
+</svg></div>
+  <ol class="pedido-pasos" aria-label="Progreso del pedido">
+    <li class="{% if paso == '01' %}paso-actual{% else %}paso-completo{% endif %}" {% if paso == '01' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">{% if paso == '01' %}1{% else %}✓{% endif %}</span><span>Elige</span></li>
+    <li class="{% if paso == '02' %}paso-actual{% elif paso == '03' %}paso-completo{% endif %}" {% if paso == '02' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">{% if paso == '03' %}✓{% else %}2{% endif %}</span><span>Revisa</span></li>
+    <li class="{% if paso == '03' %}paso-actual{% endif %}" {% if paso == '03' %}aria-current="step"{% endif %}><span class="paso-numero" aria-hidden="true">3</span><span>Confirma</span></li>
+  </ol>
+  <div class="encabezado-ilustracion" aria-hidden="true"><svg class="dibujo-lineas plato-menu" viewBox="0 0 220 180" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="110" cy="100" rx="87" ry="68"/>
+  <circle pathLength="1" cx="110" cy="100" r="54"/>
+  <circle pathLength="1" cx="110" cy="100" r="43" style="--i:1"/>
+  <path pathLength="1" d="M24 57v25a7 7 0 0 0 14 0V57m-7 0v91M188 148V57c-11 9-15 22-15 40h15" style="--i:2"/>
+  <path class="vapor-plato" d="M94 31c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M110 27c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M126 31c-9-9 9-13 0-22"/>
+  <path pathLength="1" d="M92 104q18-21 36 0l-3 15H95Zm3-5 5-7m7 3 4-7m5 9 6-6" style="--i:3"/>
+</svg></div>
+</section>
+{% endwith %}
+<p class="carrito-notificacion" data-edicion-aviso role="status" aria-live="polite" hidden></p><div data-carrito-contenido>
+{% partialdef contenido_carrito inline %}
+{% if items %}
+<div class="compra-layout">
+  <aside class="ticket-compra resumen-carrito" aria-labelledby="titulo-resumen">
+    <div class="resumen-cabecera">
+      <div><span class="resumen-institucion">UAS · UAZ</span><h2 id="titulo-resumen">Tu resumen</h2></div>
+      <svg class="resumen-icono" viewBox="0 0 32 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l4 3 4-3 4 3 4-3 6 3v31l-5-3-4 3-4-3-4 3-5-3Z"/><path d="M11 13h10M11 19h10M11 25h6"/></svg>
+    </div>
+    <div class="resumen-datos">
+      <div class="ticket-numero"><span>Número de pedido</span><strong>{{ numero_compra }}</strong></div>
+      <div class="ticket-linea"><span>Alimentos seleccionados</span><strong>{{ cantidad_carrito }}</strong></div>
+      <div class="ticket-total"><span>Total del pedido</span><strong>${{ total_carrito|floatformat:2 }} <small>MXN</small></strong></div>
+      <p class="ticket-nota"><span class="resumen-siguiente">Siguiente paso</span>Adjunta tu comprobante y confirma el pedido.</p>
+    </div>
+  </aside>
+  <section class="seleccion-compra" aria-labelledby="seleccion-titulo">
+    <div class="menu-subtitulo"><h2 id="seleccion-titulo" tabindex="-1">Tu selección</h2><span>{{ cantidad_carrito }} alimento{{ cantidad_carrito|pluralize:"s" }}</span></div>
+    <p class="ayuda">Ajusta las cantidades o quita lo que ya no se te antoje.</p>
+    <ul class="carrito-lista">
+    {% for item in items %}
+      <li class="seleccion-item">
+        <div class="seleccion-foto producto-foto">
+          <div class="foto-alternativa" aria-hidden="true"><svg class="dibujo-lineas plato-menu" viewBox="0 0 220 180" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="110" cy="100" rx="87" ry="68"/>
+  <circle pathLength="1" cx="110" cy="100" r="54"/>
+  <circle pathLength="1" cx="110" cy="100" r="43" style="--i:1"/>
+  <path pathLength="1" d="M24 57v25a7 7 0 0 0 14 0V57m-7 0v91M188 148V57c-11 9-15 22-15 40h15" style="--i:2"/>
+  <path class="vapor-plato" d="M94 31c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M110 27c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M126 31c-9-9 9-13 0-22"/>
+  <path pathLength="1" d="M92 104q18-21 36 0l-3 15H95Zm3-5 5-7m7 3 4-7m5 9 6-6" style="--i:3"/>
+</svg></div>
+          {% if item.comida.imagen %}<img src="{{ item.comida.imagen.url }}" alt="" data-foto-comida>{% endif %}
+        </div>
+        <div class="seleccion-detalle">
+          <div class="seleccion-titulo"><h3>{{ item.comida.nombre }}</h3><strong>${{ item.subtotal|floatformat:2 }}</strong></div>
+          <p class="seleccion-ingredientes">{{ item.comida.ingredientes_lista|join:", " }}</p>
+          <p class="seleccion-precio">${{ item.comida.precio|floatformat:2 }} por unidad</p>
+          <div class="carrito-controles">
+            <div class="cantidad-selector" role="group" aria-label="Cantidad de {{ item.comida.nombre }}">
+              <form data-editar-carrito method="post" action="{% url 'alumnos:ajustar_carrito' item.pk -1 %}">{% csrf_token %}<button class="cantidad-boton" type="submit" aria-label="Disminuir {{ item.comida.nombre }}" {% if item.cantidad == 1 %}disabled{% endif %}>−</button></form>
+              <strong aria-label="{{ item.cantidad }} unidades">{{ item.cantidad }}</strong>
+              <form data-editar-carrito method="post" action="{% url 'alumnos:ajustar_carrito' item.pk 1 %}">{% csrf_token %}<button class="cantidad-boton" type="submit" aria-label="Aumentar {{ item.comida.nombre }}" {% if item.cantidad == 99 %}disabled{% endif %}>+</button></form>
+            </div>
+            <form data-editar-carrito method="post" action="{% url 'alumnos:quitar_carrito' item.pk %}">{% csrf_token %}<button class="quitar-item" type="submit" aria-label="Eliminar {{ item.comida.nombre }} del carrito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5m4-5v5"/></svg> Eliminar</button></form>
+          </div>
+        </div>
+      </li>
+    {% endfor %}
+    </ul>
+  </section>
+</div>
+{% else %}
+<section class="tarjeta vacio carrito-vacio" tabindex="-1"><svg class="dibujo-lineas plato-menu" viewBox="0 0 220 180" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <ellipse class="orbita-reloj" cx="110" cy="100" rx="87" ry="68"/>
+  <circle pathLength="1" cx="110" cy="100" r="54"/>
+  <circle pathLength="1" cx="110" cy="100" r="43" style="--i:1"/>
+  <path pathLength="1" d="M24 57v25a7 7 0 0 0 14 0V57m-7 0v91M188 148V57c-11 9-15 22-15 40h15" style="--i:2"/>
+  <path class="vapor-plato" d="M94 31c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.35s" d="M110 27c-9-9 9-13 0-22"/>
+  <path class="vapor-plato" style="--demora:.7s" d="M126 31c-9-9 9-13 0-22"/>
+  <path pathLength="1" d="M92 104q18-21 36 0l-3 15H95Zm3-5 5-7m7 3 4-7m5 9 6-6" style="--i:3"/>
+</svg><h2>Tu próximo antojo te espera</h2><p>Aún no tienes alimentos en el carrito. Explora el menú y elige tus favoritos.</p><a class="boton boton-primario" href="{% url 'alumnos:menu' %}">Ver Menú →</a></section>
+{% endif %}
+<div class="tienda-barra">
+  <a class="tienda-volver" href="{% url 'alumnos:menu' %}"><span aria-hidden="true">←</span> Volver</a>
+  <div class="tienda-resumen"><span>Total de compra</span><strong>${{ total_carrito|floatformat:2 }}</strong></div>
+  {% if items %}<a class="boton boton-primario carrito-enlace" href="{% url 'alumnos:confirmar_compra' %}">Continuar <span class="carrito-contador">{{ cantidad_carrito }}</span><span aria-hidden="true">→</span></a>{% else %}<button class="boton boton-primario carrito-enlace" disabled>Continuar →</button>{% endif %}
+</div>
+{% endpartialdef %}
+</div>
+{% endblock %}
+

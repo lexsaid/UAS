@@ -1,0 +1,26 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% load static %}
+{% block title %}Registrarse · Alumnos{% endblock %}
+{% block extra_head %}{{ block.super }}<script src="{% static 'alumnos/registro.js' %}" defer></script>{% endblock %}
+{% block content %}
+<section class="pizarra registro-encabezado"><h1>Registrarse</h1></section>
+<form method="post" enctype="multipart/form-data" class="tarjeta registro-form" novalidate>
+  {% csrf_token %}
+  <p class="ayuda introduccion">Todos los campos son obligatorios excepto el apellido materno y la foto.</p>
+  {% if form.non_field_errors %}<div class="errores-form" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+  {% for field in form %}
+  <div class="campo">
+    {{ field.label_tag }}
+    {{ field }}
+    {% if field.help_text %}<div class="ayuda" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</div>{% endif %}
+    {% if field.errors %}<div role="alert">{{ field.errors }}</div>{% endif %}
+  </div>
+  {% endfor %}
+  <img class="foto-perfil previa" data-previa-foto alt="Vista previa de tu foto de perfil" hidden>
+  <p class="ayuda">Si hay errores, revisa tus datos y vuelve a seleccionar la foto y las contraseñas.</p>
+  <div class="acciones">
+    <a class="boton boton-secundario" href="{% url 'alumnos:login' %}">Cancelar</a>
+    <button class="boton boton-primario" type="submit">Registrarse</button>
+  </div>
+</form>
+{% endblock %}

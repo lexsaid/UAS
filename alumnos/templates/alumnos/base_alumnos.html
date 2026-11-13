@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Alumnos · Comedor UAS{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'alumnos/alumnos.css' %}?v=20261113-inicio-claro">
+{% endblock %}
+{% block header %}
+<header class="alumnos-cabecera">
+  {% if request.user.is_authenticated and request.user.alumno and not request.user.is_staff %}
+  <a class="marca" href="{% url 'alumnos:inicio' %}"><span class="alumnos-logo-cubiertos" aria-hidden="true"><svg class="icono" viewBox="0 0 24 24" focusable="false"><path d="M6 3v6a2.5 2.5 0 0 0 5 0V3M8.5 3v18M17 21V3c-2.6 1.4-3.5 4.4-3.5 8H17"/></svg></span><div class="marca-titulo">{% block titulo_barra %}Inicio{% endblock %}</div></a>
+  <div class="cabecera-cuenta">
+    <div class="usuario-resumen">
+      {% if request.user.alumno.foto %}
+      <img class="usuario-avatar" src="{{ request.user.alumno.foto.url }}" alt="Tu foto de perfil">
+      {% else %}<span class="usuario-avatar usuario-inicial" aria-hidden="true">{{ request.user.alumno.nombre|first }}</span>{% endif %}
+      <div class="usuario-datos"><span class="usuario-nombre">{{ request.user.alumno.nombre }}</span><span class="usuario-matricula">Matrícula: {{ request.user.alumno.matricula }}</span></div>
+    </div>
+    <details class="alumnos-desplegable">
+      <summary aria-label="Abrir navegación"><span class="alumnos-hamburguesa" aria-hidden="true"></span></summary>
+      <nav class="alumnos-opciones" aria-label="Navegación de alumnos">
+        <a href="{% url 'alumnos:inicio' %}" {% if request.resolver_match.url_name == 'inicio' %}aria-current="page"{% endif %}>Inicio</a>
+        <a href="{% url 'alumnos:menu' %}" {% if request.resolver_match.url_name == 'menu' %}aria-current="page"{% endif %}>Menú</a>
+        <a href="{% url 'alumnos:historial' %}" {% if request.resolver_match.url_name == 'historial' %}aria-current="page"{% endif %}>Historial</a>
+        <a href="{% url 'alumnos:carrito' %}" {% if request.resolver_match.url_name == 'carrito' %}aria-current="page"{% endif %}>Mi carrito</a>
+        <form method="post" action="{% url 'alumnos:salir' %}">{% csrf_token %}<button type="submit">Cerrar sesión</button></form>
+      </nav>
+    </details>
+  </div>
+  {% else %}
+  <a class="marca" href="{% url 'alumnos:login' %}"><span class="alumnos-logo-cubiertos" aria-hidden="true"><svg class="icono" viewBox="0 0 24 24" focusable="false"><path d="M6 3v6a2.5 2.5 0 0 0 5 0V3M8.5 3v18M17 21V3c-2.6 1.4-3.5 4.4-3.5 8H17"/></svg></span><div class="marca-titulo">Comedor <span>UAS · UAZ</span></div></a>
+  {% endif %}
+</header>
+{% endblock %}
+
+
+
+
+
+

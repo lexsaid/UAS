@@ -6,8 +6,8 @@ from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from .forms import ComidaForm, LoginComedorForm
-from .models import Comida
+from .forms import ComidaForm, HorarioPedidosForm, LoginComedorForm
+from .models import Comida, HorarioPedidos
 
 
 def es_comedor(user):
@@ -51,6 +51,17 @@ def inicio(request):
     return render(request, 'comedor/inicio.html', {
         'total_comidas': Comida.objects.count(),
     })
+
+
+@comedor_requerido
+def configurar_horario_pedidos(request):
+    horario = HorarioPedidos.objects.filter(pk=1).first() or HorarioPedidos()
+    form = HorarioPedidosForm(request.POST if request.method == 'POST' else None, instance=horario)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Horario de pedidos guardado.')
+        return redirect('comedor:configuracion')
+    return render(request, 'comedor/configuracion.html', {'form': form})
 
 
 @comedor_requerido

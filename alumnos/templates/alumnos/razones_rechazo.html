@@ -1,0 +1,11 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% block title %}Rechazo del pedido · Alumnos{% endblock %}
+{% block titulo_barra %}Rechazo del pedido{% endblock %}
+{% block body_class %}pagina-tienda pagina-pedidos{% endblock %}
+{% block content %}
+<section class="razones-rechazo" aria-labelledby="titulo-razones">
+  <h1 id="titulo-razones">Razones del rechazo</h1>
+  {% if razones %}<ul>{% for razon in razones %}<li>{{ razon }}</li>{% endfor %}</ul>{% else %}<p>Aún no hay razones disponibles para este pedido.</p>{% endif %}
+</section>
+<div class="tienda-barra"><a class="tienda-volver" href="{% url 'alumnos:compra_realizada' compra.numero %}"><span aria-hidden="true">←</span> Volver</a></div>
+{% endblock %}

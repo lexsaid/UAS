@@ -1,0 +1,24 @@
+{% extends "alumnos/base_alumnos.html" %}
+{% block title %}Detalle del pedido · Alumnos{% endblock %}
+{% block titulo_barra %}Detalle del pedido{% endblock %}
+{% block body_class %}pagina-tienda pagina-pedidos{% endblock %}
+{% block content %}
+<section class="detalle-recibo detalle-{{ compra.estado_aceptacion }}" aria-labelledby="pedido-recibido">
+  {% if compra.estado_aceptacion == 'rechazado' %}
+  <div class="detalle-bienvenida"><div class="detalle-icono rechazo-icono" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="32" cy="32" r="25"/><path d="m24 24 16 16m0-16L24 40"/></svg></div><div><h1 id="pedido-recibido">¡Rechazamos tu pedido!</h1><p>Tu pedido no fue aceptado. Consulta las razones del rechazo.</p></div></div>
+  {% elif compra.estado_aceptacion == 'aceptado' %}
+  <div class="detalle-bienvenida"><div class="detalle-icono detalle-estado-icono" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="25"/><path d="m20 32 8 8 16-16"/></svg></div><div><h1 id="pedido-recibido">¡Aceptamos tu pedido!</h1><p>Consulta aquí los detalles de tu pedido.</p></div></div>
+  {% else %}
+  <div class="detalle-bienvenida"><div class="detalle-icono detalle-estado-icono" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="32" cy="32" r="25"/><path d="M32 17v15l10 6"/></svg></div><div><h1 id="pedido-recibido">Tu pedido está pendiente</h1><p>Recibimos tu pedido y tu comprobante. Espera la revisión del comedor.</p></div></div>
+  {% endif %}
+  <div class="detalle-contenido">
+    <div class="detalle-referencia"><div><span>Número de pedido</span><strong>{{ compra.folio }}</strong></div><time datetime="{{ compra.creada|date:'c' }}">{{ compra.creada|date:"d/m/Y · H:i" }}</time></div>
+    <div class="detalle-columnas" aria-hidden="true"><span>Lo que pediste</span><span>Importe</span></div>
+    <ul class="detalle-alimentos">{% for item in compra.alimentos %}<li><div><span class="detalle-cantidad" aria-label="{{ item.cantidad }} unidades">{{ item.cantidad }} ×</span><span>{{ item.nombre }}</span></div><strong>${{ item.subtotal }}</strong></li>{% endfor %}</ul>
+    <div class="detalle-total"><span>Total del pedido</span><strong>${{ compra.total|floatformat:2 }} <small>MXN</small></strong></div>
+  </div>
+</section>
+<div class="tienda-barra"><a class="tienda-volver" href="{% url 'alumnos:historial' %}"><span aria-hidden="true">←</span> Volver</a>{% if compra.estado_aceptacion == 'rechazado' %}<a class="boton boton-primario rechazo-enlace" href="{% url 'alumnos:razones_rechazo' compra.numero %}">Ver Rechazo</a>{% endif %}</div>
+{% endblock %}
+
+

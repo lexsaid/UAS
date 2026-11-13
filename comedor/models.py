@@ -1,5 +1,5 @@
 import re
-from datetime import timedelta
+from datetime import time, timedelta
 from decimal import Decimal
 
 from django.core.validators import MinValueValidator
@@ -24,6 +24,24 @@ def separar_ingredientes(texto):
             vistos.add(ingrediente.lower())
             ingredientes.append(ingrediente)
     return ingredientes
+
+
+class HorarioPedidos(models.Model):
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    hora_inicio = models.TimeField(default=time(15, 0))
+    hora_fin = models.TimeField(default=time(3, 0))
+
+    def permite_registro(self, hora=None):
+        hora = hora if hora is not None else timezone.localtime().time()
+        if self.hora_inicio < self.hora_fin:
+            return self.hora_inicio <= hora < self.hora_fin
+        return hora >= self.hora_inicio or hora < self.hora_fin
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(condition=models.Q(id=1), name='horario_pedidos_unico'),
+            models.CheckConstraint(condition=~models.Q(hora_inicio=models.F('hora_fin')), name='horario_pedidos_horas_distintas'),
+        ]
 
 
 class Comida(models.Model):

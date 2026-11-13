@@ -275,3 +275,73 @@ class ComedorTests(TestCase):
         respuesta = self.client.get(reverse('comedor:lista'))
         self.assertNotContains(respuesta, 'data-fecha-auto')
         self.assertNotContains(respuesta, 'Día anterior')
+
+class ConfiguracionHorarioTests(TestCase):
+    def setUp(self):
+        from .models import HorarioPedidos
+        self.modelo = HorarioPedidos
+        self.url = reverse('comedor:configuracion')
+        self.encargado = User.objects.create_user('horario-encargado', is_staff=True)
+        self.alumno = User.objects.create_user('horario-alumno')
+
+    def test_acceso_solo_comedor_y_csrf(self):
+        from django.test import Client
+        for usuario in (None, self.alumno):
+            if usuario:
+                self.client.force_login(usuario)
+            for metodo in (self.client.get, self.client.post):
+                self.assertEqual(metodo(self.url, {'hora_inicio': '16:00', 'hora_fin': '04:00'}).status_code, 302)
+            self.assertFalse(self.modelo.objects.exists())
+        cliente = Client(enforce_csrf_checks=True)
+        cliente.force_login(self.encargado)
+        self.assertEqual(cliente.post(self.url, {'hora_inicio': '16:00', 'hora_fin': '04:00'}).status_code, 403)
+
+    def test_valores_iniciales_y_enlace_solo_en_menu(self):
+        self.client.force_login(self.encargado)
+        respuesta = self.client.get(self.url)
+        self.assertContains(respuesta, 'value="15:00"')
+        self.assertContains(respuesta, 'value="03:00"')
+        self.assertFalse(self.modelo.objects.exists())
+        self.assertContains(self.client.get(reverse('comedor:inicio')), 'href="' + self.url + '"', count=1)
+
+    def test_guardar_actualizar_y_mostrar_en_alumnos(self):
+        from datetime import time
+        from alumnos.models import Alumno
+        Alumno.objects.create(usuario=self.alumno, nombre='Vista', apellido_paterno='Horario', correo='horario@example.test', matricula='12345678')
+        self.client.force_login(self.encargado)
+        for inicio, fin in (('16:30', '02:45'), ('08:00', '14:00')):
+            self.assertRedirects(self.client.post(self.url, {'hora_inicio': inicio, 'hora_fin': fin}), self.url)
+            self.assertEqual(self.modelo.objects.count(), 1)
+            horario = self.modelo.objects.get()
+            self.assertEqual(horario.hora_inicio, time.fromisoformat(inicio))
+            self.assertEqual(horario.hora_fin, time.fromisoformat(fin))
+            self.client.force_login(self.alumno)
+            respuesta = self.client.get(reverse('alumnos:inicio'))
+            self.assertEqual(respuesta.context['horario'].hora_inicio, horario.hora_inicio)
+            self.assertContains(respuesta, 'Del día siguiente' if fin < inicio else 'Del mismo día')
+            self.client.force_login(self.encargado)
+
+    def test_errores_no_modifican_horario(self):
+        from datetime import time
+        self.modelo.objects.create()
+        self.client.force_login(self.encargado)
+        for inicio, fin in (('', '03:00'), ('25:00', '03:00'), ('15:00', ''), ('15:00', '15:00'), ('15:00', 'abc')):
+            respuesta = self.client.post(self.url, {'hora_inicio': inicio, 'hora_fin': fin})
+            self.assertEqual(respuesta.status_code, 200)
+            self.assertTrue(respuesta.context['form'].errors)
+            self.assertEqual(self.modelo.objects.get().hora_inicio, time(15))
+            self.assertEqual(self.modelo.objects.get().hora_fin, time(3))
+
+    def test_limites_horario_diurno_y_cruce_medianoche(self):
+        from datetime import time, datetime
+        from unittest.mock import patch
+        horario = self.modelo(hora_inicio=time(15), hora_fin=time(3))
+        for hora, esperado in ((time(14, 59), False), (time(15), True), (time(23, 59), True), (time(0), True), (time(2, 59), True), (time(3), False)):
+            with self.subTest(hora=hora):
+                self.assertEqual(horario.permite_registro(hora), esperado)
+        horario.hora_inicio, horario.hora_fin = time(8), time(14)
+        for hora, esperado in ((time(7, 59), False), (time(8), True), (time(13, 59), True), (time(14), False), (time(0), False)):
+            with self.subTest(hora=hora):
+                self.assertEqual(horario.permite_registro(hora), esperado)
+        with patch('comedor.models.timezone.localtime', return_value=datetime(2026, 11, 12, 9)):
+            self.assertTrue(horario.permite_registro())

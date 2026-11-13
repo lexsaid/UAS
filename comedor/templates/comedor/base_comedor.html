@@ -32,6 +32,7 @@
         <a href="{% url 'comedor:lista' %}">Ver comedor</a>
         <a href="{% url 'comedor:agregar' %}">Agregar comida</a>
         <span class="nav-pendiente">Solicitudes de comida (próximamente)</span>
+        <a href="{% url 'comedor:configuracion' %}">Configuración</a>
         <form method="post" action="{% url 'comedor:salir' %}">
           {% csrf_token %}
           <button type="submit">Cerrar sesión</button>
