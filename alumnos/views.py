@@ -159,7 +159,8 @@ def confirmar_compra(request):
         existente = Compra.objects.filter(numero=form.cleaned_data['numero'], alumno=alumno).first()
         if existente:
             return redirect('alumnos:compra_realizada', numero=existente.numero)
-        if not horario.permite_registro():
+        ahora = timezone.localtime()
+        if not horario.permite_registro(ahora.time()):
             form.add_error(None, 'El registro de pedidos está cerrado. Consulta el horario en Inicio. Tu carrito se conserva.')
             estado_horario = obtener_estado_horario(horario)
             return render(request, 'alumnos/confirmar_compra.html', {
@@ -178,7 +179,8 @@ def confirmar_compra(request):
                     form.add_error(None, 'Tu selección cambió o la página venció. Vuelve al carrito y revisa el total antes de confirmar.')
                 else:
                     compra = Compra(alumno=alumno, numero=numero, alimentos=mostrado,
-                                    total=sum((item.subtotal for item in items), Decimal('0.00')))
+                                    total=sum((item.subtotal for item in items), Decimal('0.00')),
+                                    fecha_servicio=horario.fecha_servicio_pedido(ahora))
                     compra.comprobante = form.cleaned_data['comprobante']
                     # Guardar primero el archivo permite limpiarlo incluso si falla el INSERT.
                     compra.comprobante.save(compra.comprobante.name, compra.comprobante.file, save=False)
@@ -209,8 +211,8 @@ def mostrar_detalle_compra(request, numero):
 @requerir_alumno
 def mostrar_razones_rechazo(request, numero):
     compra = get_object_or_404(Compra, numero=numero, alumno=request.user.alumno, estado_aceptacion='rechazado')
-    # Pendiente del módulo de revisión del comedor: conectar aquí sus razones guardadas.
-    return render(request, 'alumnos/razones_rechazo.html', {'compra': compra, 'razones': []})
+    razones = [compra.razon_rechazo] if compra.razon_rechazo else []
+    return render(request, 'alumnos/razones_rechazo.html', {'compra': compra, 'razones': razones})
 
 
 @requerir_alumno

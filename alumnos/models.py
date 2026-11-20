@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db.models.functions import Lower
+from django.utils import timezone
 
 
 def foto_alumno(instance, filename):
@@ -69,7 +70,9 @@ class Compra(models.Model):
     total = models.DecimalField(max_digits=14, decimal_places=2)
     comprobante = models.FileField(upload_to=archivo_comprobante, storage=almacenamiento_comprobantes)
     creada = models.DateTimeField(auto_now_add=True)
+    fecha_servicio = models.DateField(default=timezone.localdate, db_index=True, editable=False)
     estado_aceptacion = models.CharField(max_length=20, default='pendiente', choices=[('pendiente', 'Pendiente'), ('aceptado', 'Aceptado'), ('rechazado', 'Rechazado')])
+    razon_rechazo = models.TextField(blank=True, default='')
 
     class Meta:
         ordering = ['-creada']

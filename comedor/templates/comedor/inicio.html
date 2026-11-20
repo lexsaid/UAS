@@ -34,13 +34,13 @@
       </a>
     </li>
     <li>
-      <div class="acceso acceso-pendiente" aria-disabled="true">
+      <a class="acceso" href="{% url 'comedor:lista_pedidos' %}">
         <span class="acceso-icono" aria-hidden="true"><svg class="icono"><use href="#i-pedidos"></use></svg></span>
         <span class="acceso-cuerpo">
           <span class="acceso-titulo">Solicitudes de comida</span>
-          <span class="acceso-texto">Aquí verás los pedidos de los clientes. Aún no está disponible.</span>
+          <span class="acceso-texto">Revisa, acepta o consulta el historial de pedidos de los clientes.</span>
         </span>
-      </div>
+      </a>
     </li>
   </ul>
 {% endblock %}

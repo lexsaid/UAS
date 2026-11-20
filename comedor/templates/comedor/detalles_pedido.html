@@ -1,0 +1,148 @@
+{% extends "comedor/base_comedor.html" %}
+
+{% block titulo_pagina %}Detalles del pedido{% endblock %}
+
+{% block content %}
+<style>
+  .detalle-pedido { max-width: 850px; margin: 0 auto; }
+  .detalle-seccion { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 1.25rem; margin-bottom: 1rem; }
+  .detalle-seccion h2 { margin-top: 0; }
+  .detalle-encabezado { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .detalle-encabezado h2, .detalle-alumno h3 { margin: 0; }
+  .detalle-encabezado p, .detalle-alumno p { margin: .35rem 0 0; color: #666; }
+  .detalle-estado { display: inline-block; padding: .35rem .75rem; border-radius: 20px; font-size: .85rem; font-weight: bold; white-space: nowrap; }
+  .detalle-estado-pendiente { background: #fff3cd; color: #856404; }
+  .detalle-estado-aceptado { background: #d4edda; color: #155724; }
+  .detalle-estado-rechazado { background: #f8d7da; color: #721c24; }
+  .detalle-alumno { display: flex; align-items: center; gap: 1rem; margin-top: 1.25rem; }
+  .detalle-foto { width: 6rem; height: 6rem; flex: none; border-radius: 50%; object-fit: cover; background: #f1f3f5; }
+  .detalle-foto-placeholder { display: grid; place-items: center; color: #6c757d; }
+  .detalle-foto-placeholder svg { width: 3.5rem; height: 3.5rem; fill: currentColor; }
+  .detalle-razon { margin: 1rem 0 0; color: #721c24; }
+  .detalle-alimentos { width: 100%; border-collapse: collapse; }
+  .detalle-alimentos th, .detalle-alimentos td { padding: .65rem .4rem; border-bottom: 1px solid #eee; text-align: left; }
+  .detalle-alimentos th:last-child, .detalle-alimentos td:last-child { text-align: right; }
+  .detalle-total { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: 0; font-size: 1.15rem; }
+  .detalle-comprobante { width: 100%; min-height: 65vh; border: 1px solid #ddd; border-radius: 6px; }
+  .detalle-imagen { display: block; max-width: 100%; max-height: 70vh; margin: 0 auto; object-fit: contain; }
+  .detalle-volver { display: inline-block; margin: .25rem 0 1rem; color: #1b4332; }
+  .pedido-acciones { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1rem; }
+  .pedido-acciones form { margin: 0; }
+  .pedido-acciones label { display: block; margin-bottom: .35rem; font-weight: bold; }
+  .pedido-acciones textarea { display: block; width: min(100%, 28rem); box-sizing: border-box; margin-bottom: .5rem; padding: .5rem; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+  .btn-accion { display: inline-flex; align-items: center; padding: .6rem 1rem; border: 0; border-radius: 6px; color: #fff; cursor: pointer; }
+  .btn-accion:disabled { background: #6c757d; cursor: not-allowed; }
+  .btn-aceptar { background: #1b4332; }
+  .btn-cancelar { background: #dc3545; }
+  @media (max-width: 520px) {
+    .detalle-seccion { padding: 1rem; }
+    .detalle-encabezado { flex-direction: column; }
+    .detalle-alumno { align-items: flex-start; }
+    .detalle-foto { width: 4.5rem; height: 4.5rem; }
+    .detalle-alimentos { font-size: .85rem; }
+    .detalle-alimentos th, .detalle-alimentos td { padding: .55rem .2rem; }
+  }
+</style>
+
+<main class="contenedor detalle-pedido">
+  <a class="detalle-volver" href="{% url 'comedor:lista_pedidos' %}?fecha={{ fecha_consulta|date:'Y-m-d' }}">← Volver a los pedidos</a>
+
+  <section class="detalle-seccion">
+    <div class="detalle-encabezado">
+      <div>
+        <h2>Pedido {{ pedido.folio }}</h2>
+        <p>{{ pedido.creada|date:"d/m/Y H:i" }}</p>
+      </div>
+      <span class="detalle-estado detalle-estado-{{ pedido.estado_aceptacion }}">
+        {{ pedido.get_estado_aceptacion_display }}
+      </span>
+    </div>
+    <div class="detalle-alumno">
+      {% if pedido.alumno.foto %}
+        <img class="detalle-foto" src="{{ pedido.alumno.foto.url }}" alt="Foto de {{ pedido.alumno.nombre_completo }}">
+      {% else %}
+        <div class="detalle-foto detalle-foto-placeholder" role="img" aria-label="Sin foto de perfil">
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="21" r="13"/><path d="M8 58c1-14 10-22 24-22s23 8 24 22z"/></svg>
+        </div>
+      {% endif %}
+      <div>
+        <h3>{{ pedido.alumno.nombre_completo }}</h3>
+        <p><strong>Matrícula:</strong> {{ pedido.alumno.matricula }}</p>
+        <p><strong>Correo:</strong> {{ pedido.alumno.correo }}</p>
+      </div>
+    </div>
+    {% if pedido.razon_rechazo %}
+      <p class="detalle-razon"><strong>Motivo de cancelación:</strong> {{ pedido.razon_rechazo }}</p>
+    {% endif %}
+  </section>
+
+  <section class="detalle-seccion">
+    <h2>Alimentos del pedido</h2>
+    <table class="detalle-alimentos">
+      <thead>
+        <tr><th>Alimento</th><th>Cantidad</th><th>Precio unitario</th><th>Subtotal</th></tr>
+      </thead>
+      <tbody>
+        {% for item in pedido.alimentos %}
+          <tr>
+            <td>{{ item.nombre }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>${{ item.precio|default:item.subtotal }}</td>
+            <td>${{ item.subtotal|default:item.precio }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="detalle-seccion">
+    <h2>Comprobante de pago</h2>
+    <p><a href="{% url 'comedor:comprobante_pedido' pedido.pk %}" target="_blank" rel="noopener">Abrir comprobante en otra pestaña</a></p>
+    {% if comprobante_pdf %}
+      <iframe class="detalle-comprobante" src="{% url 'comedor:comprobante_pedido' pedido.pk %}" title="Comprobante de pago en PDF"></iframe>
+    {% else %}
+      <img class="detalle-imagen" src="{% url 'comedor:comprobante_pedido' pedido.pk %}" alt="Comprobante de pago">
+    {% endif %}
+  </section>
+
+  <section class="detalle-seccion detalle-total">
+    <strong>Total del pedido</strong>
+    <strong>${{ pedido.total|floatformat:2 }} MXN</strong>
+  </section>
+
+  {% if es_hoy and pedido.estado_aceptacion == 'pendiente' %}
+    <section class="detalle-seccion">
+      <h2>Acciones del pedido</h2>
+      <div class="pedido-acciones">
+        <form method="post" action="{% url 'comedor:aceptar_pedido' pedido.pk %}"
+              data-confirm="¿Confirmas que deseas aceptar el pedido {{ pedido.folio }}?">
+          {% csrf_token %}
+          <button type="submit" class="btn-accion btn-aceptar">Aceptar pedido</button>
+        </form>
+
+        <form method="post" action="{% url 'comedor:rechazar_pedido' pedido.pk %}"
+              data-confirm="¿Confirmas que deseas cancelar el pedido {{ pedido.folio }}? Esta acción no se puede deshacer.">
+          {% csrf_token %}
+          <label for="razon-rechazo">Razón de cancelación:</label>
+          <textarea id="razon-rechazo" name="razon_rechazo" required rows="3"
+                    placeholder="Ej. Comprobante ilegible..."></textarea>
+          <button type="submit" class="btn-accion btn-cancelar">Cancelar pedido</button>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+</main>
+
+<script>
+  document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+      if (!window.confirm(form.dataset.confirm)) {
+        event.preventDefault();
+        return;
+      }
+      const boton = form.querySelector('button[type="submit"]');
+      if (boton) boton.disabled = true;
+    });
+  });
+</script>
+{% endblock %}

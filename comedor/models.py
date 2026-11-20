@@ -37,6 +37,17 @@ class HorarioPedidos(models.Model):
             return self.hora_inicio <= hora < self.hora_fin
         return hora >= self.hora_inicio or hora < self.hora_fin
 
+    def fecha_servicio_pedido(self, instante=None):
+        instante = timezone.localtime(instante) if instante else timezone.localtime()
+        if not self.permite_registro(instante.time()):
+            raise ValueError('No se puede asignar fecha de servicio fuera del horario de pedidos.')
+        dias_hasta_servicio = instante.time() >= self.hora_inicio
+        return instante.date() + timedelta(days=dias_hasta_servicio)
+
+    def fecha_servicio_actual(self, instante=None):
+        instante = timezone.localtime(instante) if instante else timezone.localtime()
+        return instante.date() + timedelta(days=instante.time() >= self.hora_inicio)
+
     class Meta:
         constraints = [
             models.CheckConstraint(condition=models.Q(id=1), name='horario_pedidos_unico'),

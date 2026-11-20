@@ -35,7 +35,8 @@ Registro: http://localhost:8000/alumnos/registro/
 
 Incluye registro, inicio de sesión, menú, carrito y pedidos con comprobante e historial.
 El menú usa las comidas del comedor. Solo se pueden confirmar pedidos dentro del horario establecido; fuera de ese horario se bloquea el botón de confirmación y el carrito se conserva.
-Para ampliar o modificar ese horario, entra en Configuración desde el menú desplegable del comedor y guarda las nuevas horas de inicio y fin.
+Para ampliar o modificar ese horario, entra en Configuración desde el menú desplegable del comedor. El inicio debe ser a las 2:00 p. m. o después y el cierre, a más tardar a las 4:00 a. m. del día siguiente. Los pedidos de la tarde y madrugada se agrupan por fecha de servicio; las tandas pasadas quedan como historial de solo lectura.
+En Solicitudes de comida, la tanda actual se puede revisar y actualizar; cada pedido conserva su fecha de servicio para que los pedidos antes y después de medianoche queden juntos.
 La revisión de pedidos y los motivos de rechazo quedan pendientes de integrar.
 
 nota: ya hay un usuario registrado que servira como pruebas correo: santiago@gmai.com y contraseña: santiago

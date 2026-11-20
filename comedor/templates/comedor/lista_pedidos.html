@@ -1,0 +1,126 @@
+{% extends "comedor/base_comedor.html" %}
+
+{% block titulo_pagina %}Solicitudes de comida{% endblock %}
+
+{% block content %}
+<style>
+  .cabecera-pedidos { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+  .nota-hoy { color: #1b4332; font-weight: 500; }
+  .nota-historial { color: #6c757d; }
+  .selector-fecha { display: flex; align-items: center; gap: 0.5rem; }
+  .selector-fecha select { padding: 0.5rem; border-radius: 6px; border: 1px solid #ccc; }
+  .acciones-cabecera { display: flex; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+  .btn-pdf { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #1b4332; background: #1b4332; color: #fff; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; transition: background-color 0.12s; }
+  .btn-pdf:hover { background: #24503f; border-color: #24503f; }
+  .btn-pdf:disabled, .btn-pdf[aria-disabled="true"] { background: #e9ecef; border-color: #ced4da; color: #6c757d; cursor: not-allowed; }
+
+  .lista-pedidos { display: grid; gap: 1rem; }
+  .pedido { background: #fff; border: 1px dashed #ccc; border-radius: 10px; padding: 1.25rem; }
+  .pedido-fila { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; }
+  .pedido-folio { font-weight: bold; font-size: 1.1rem; }
+  .pedido-hora { margin-left: 0.5rem; color: #666; }
+  .pedido p { margin: 0.25rem 0; }
+  .pedido ul { margin: 0.5rem 0; padding-left: 1.2rem; }
+  .pedido-motivo { color: #dc3545; margin-top: 0.5rem; }
+  .pedido-acciones { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; }
+
+  .badge { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+  .badge-aceptado { background: #d4edda; color: #155724; }
+  .badge-rechazado { background: #f8d7da; color: #721c24; }
+  .badge-pendiente { background: #fff3cd; color: #856404; }
+
+  .btn-detalles { display: inline-flex; align-items: center; padding: 0.5rem 1rem; border-radius: 6px; background: #495057; color: #fff; text-decoration: none; }
+
+  .sin-pedidos { text-align: center; padding: 2rem; background: #fff; border-radius: 10px; border: 1px dashed #ccc; }
+</style>
+
+<div class="contenedor">
+  <div class="cabecera-pedidos">
+    <div>
+      <h2>Pedidos para los lonches del {{ fecha_consulta|date:"d/m/Y" }}</h2>
+      {% if es_hoy %}
+        <p class="nota-hoy">Tanda actual: abre los detalles para aceptar o cancelar los pedidos pendientes.</p>
+      {% else %}
+        <p class="nota-historial">Historial de un día pasado: <strong>modo solo consulta</strong> (no se permiten modificaciones).</p>
+      {% endif %}
+    </div>
+
+    <div class="acciones-cabecera">
+      <!-- Selector de historial por días -->
+      <form method="get" class="selector-fecha">
+        <label for="fecha"><strong>Consultar tanda:</strong></label>
+        <select name="fecha" id="fecha" onchange="this.form.submit()">
+          <option value="{{ hoy|date:'Y-m-d' }}" {% if es_hoy %}selected{% endif %}>Tanda actual ({{ hoy|date:"d/m/Y" }})</option>
+          {% for f in fechas_historial %}
+            {% if f != hoy %}
+              <option value="{{ f|date:'Y-m-d' }}" {% if fecha_consulta == f %}selected{% endif %}>
+                Lonches del {{ f|date:"d/m/Y" }} (Historial)
+              </option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <noscript><button type="submit">Ver</button></noscript>
+      </form>
+
+      {% if es_hoy %}
+        <a class="btn-pdf" href="{% url 'comedor:generar_pdf_pedidos' %}?fecha={{ fecha_consulta|date:'Y-m-d' }}"
+           {% if not pedidos_aceptados_count %}data-sin-aceptados="true"{% endif %}>
+          Generar pdf
+        </a>
+      {% else %}
+        <button type="button" class="btn-pdf" disabled aria-disabled="true"
+                title="Solo se puede generar el PDF de los pedidos del día vigente">
+          Generar pdf
+        </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if pedidos %}
+    <div class="lista-pedidos">
+      {% for pedido in pedidos %}
+        <article class="pedido">
+          <div class="pedido-fila">
+            <div>
+              <span class="pedido-folio">{{ pedido.folio }}</span>
+              <span class="pedido-hora">• {{ pedido.creada|date:"H:i" }} hrs</span>
+              <p><strong>Alumno:</strong> {{ pedido.alumno.nombre_completo }} ({{ pedido.alumno.matricula }})</p>
+
+              <!-- Listado de alimentos -->
+              <ul>
+                {% for item in pedido.alimentos %}
+                  <li>{{ item.cantidad }}x {{ item.nombre }} — ${{ item.subtotal|default:item.precio }}</li>
+                {% endfor %}
+              </ul>
+              <p><strong>Total:</strong> ${{ pedido.total }}</p>
+
+              {% if pedido.estado_aceptacion == 'rechazado' and pedido.razon_rechazo %}
+                <p class="pedido-motivo"><strong>Motivo de cancelación:</strong> {{ pedido.razon_rechazo }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Estado y acceso al detalle -->
+            <div class="pedido-acciones">
+              <a class="btn btn-detalles" href="{% url 'comedor:detalles_pedido' pedido.pk %}">
+                Ver detalles
+              </a>
+              <span class="badge
+                {% if pedido.estado_aceptacion == 'aceptado' %}badge-aceptado
+                {% elif pedido.estado_aceptacion == 'rechazado' %}badge-rechazado
+                {% else %}badge-pendiente{% endif %}">
+                {{ pedido.get_estado_aceptacion_display }}
+              </span>
+
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="sin-pedidos">
+      No hay pedidos registrados para el día {{ fecha_consulta|date:"d/m/Y" }}.
+    </p>
+  {% endif %}
+</div>
+
+{% endblock %}

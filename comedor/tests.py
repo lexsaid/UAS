@@ -1,15 +1,21 @@
 import shutil
 import tempfile
+from datetime import datetime, time, timedelta
 from decimal import Decimal
 from io import BytesIO
+from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.storage import FileSystemStorage
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from PIL import Image
 
-from .models import Comida, separar_ingredientes
+from alumnos.models import Alumno, Compra
+
+from .models import Comida, HorarioPedidos, separar_ingredientes
 
 MEDIA_DE_PRUEBA = tempfile.mkdtemp()
 
@@ -106,6 +112,198 @@ class ComedorTests(TestCase):
         respuesta = self.client.get(reverse('comedor:lista'))
         self.assertEqual(respuesta.status_code, 302)
         self.assertIn(reverse('comedor:login'), respuesta['Location'])
+
+    def test_detalles_pedido_muestran_datos_y_comprobante_privado(self):
+        alumno = Alumno.objects.create(
+            usuario=self.cliente,
+            nombre='Ana',
+            apellido_paterno='Pérez',
+            correo='ana@example.com',
+            matricula='A123',
+        )
+        alumno.foto = imagen_de_prueba('perfil.png')
+        alumno.save()
+        contenido = b'comprobante de prueba'
+        almacenamiento = FileSystemStorage(location=MEDIA_DE_PRUEBA)
+        campo_comprobante = Compra._meta.get_field('comprobante')
+        with patch.object(campo_comprobante, 'storage', almacenamiento):
+            pedido = Compra.objects.create(
+                alumno=alumno,
+                alimentos=[{
+                    'nombre': 'Tacos dorados',
+                    'cantidad': 2,
+                    'precio': '45.00',
+                    'subtotal': '90.00',
+                }],
+                total=Decimal('90.00'),
+                fecha_servicio=HorarioPedidos().fecha_servicio_actual(),
+                comprobante=SimpleUploadedFile(
+                    'comprobante.png', contenido, content_type='image/png',
+                ),
+            )
+            self.client.force_login(self.cliente)
+            for url in (
+                reverse('comedor:detalles_pedido', args=[pedido.pk]),
+                reverse('comedor:comprobante_pedido', args=[pedido.pk]),
+            ):
+                with self.subTest(url=url):
+                    self.assertEqual(self.client.get(url).status_code, 302)
+
+            self.entrar()
+
+            detalles = self.client.get(reverse('comedor:detalles_pedido', args=[pedido.pk]))
+            self.assertContains(detalles, 'Ana Pérez')
+            self.assertContains(detalles, alumno.foto.url)
+            self.assertContains(detalles, 'alt="Foto de Ana Pérez"')
+            self.assertContains(detalles, 'Tacos dorados')
+            self.assertContains(detalles, 'Comprobante de pago')
+            self.assertContains(detalles, reverse('comedor:aceptar_pedido', args=[pedido.pk]))
+            self.assertContains(detalles, reverse('comedor:rechazar_pedido', args=[pedido.pk]))
+            self.assertContains(detalles, 'data-confirm=')
+            self.assertContains(
+                detalles,
+                reverse('comedor:comprobante_pedido', args=[pedido.pk]),
+            )
+
+            lista = self.client.get(reverse('comedor:lista_pedidos'))
+            self.assertNotContains(lista, reverse('comedor:aceptar_pedido', args=[pedido.pk]))
+            self.assertNotContains(lista, reverse('comedor:rechazar_pedido', args=[pedido.pk]))
+
+            comprobante = self.client.get(
+                reverse('comedor:comprobante_pedido', args=[pedido.pk]),
+            )
+            self.assertEqual(comprobante['Content-Type'], 'image/png')
+            self.assertEqual(b''.join(comprobante.streaming_content), contenido)
+
+    def test_lista_pedidos_agrupa_por_fecha_de_servicio_y_limita_edicion_al_dia_actual(self):
+        alumno = Alumno.objects.create(
+            usuario=self.cliente,
+            nombre='Ana',
+            apellido_paterno='Pérez',
+            correo='ana-pedidos@example.com',
+            matricula='A124',
+        )
+        fecha_actual = HorarioPedidos().fecha_servicio_actual()
+        fecha_pasada = fecha_actual - timedelta(days=1)
+        pedido_actual = Compra.objects.create(
+            alumno=alumno,
+            alimentos=[{'nombre': 'Tacos', 'cantidad': 1, 'precio': '25.00', 'subtotal': '25.00'}],
+            total=Decimal('25.00'),
+            comprobante='actual.png',
+            fecha_servicio=fecha_actual,
+        )
+        pedido_pasado = Compra.objects.create(
+            alumno=alumno,
+            alimentos=[{'nombre': 'Sopa', 'cantidad': 1, 'precio': '15.00', 'subtotal': '15.00'}],
+            total=Decimal('15.00'),
+            comprobante='pasado.png',
+            fecha_servicio=fecha_pasada,
+        )
+        self.entrar()
+
+        actual = self.client.get(reverse('comedor:lista_pedidos'))
+        self.assertEqual(actual.context['fecha_consulta'], fecha_actual)
+        self.assertTrue(actual.context['es_hoy'])
+        self.assertContains(actual, pedido_actual.folio)
+        self.assertNotContains(actual, pedido_pasado.folio)
+
+        pasado = self.client.get(reverse('comedor:lista_pedidos'), {'fecha': fecha_pasada.isoformat()})
+        self.assertFalse(pasado.context['es_hoy'])
+        self.assertContains(pasado, pedido_pasado.folio)
+        self.assertNotContains(pasado, pedido_actual.folio)
+
+        detalles = self.client.get(reverse('comedor:detalles_pedido', args=[pedido_pasado.pk]))
+        self.assertNotContains(detalles, reverse('comedor:aceptar_pedido', args=[pedido_pasado.pk]))
+        self.assertNotContains(detalles, reverse('comedor:rechazar_pedido', args=[pedido_pasado.pk]))
+        respuesta = self.client.post(reverse('comedor:aceptar_pedido', args=[pedido_pasado.pk]))
+        self.assertRedirects(
+            respuesta,
+            f"{reverse('comedor:lista_pedidos')}?fecha={fecha_pasada.isoformat()}",
+        )
+        pedido_pasado.refresh_from_db()
+        self.assertEqual(pedido_pasado.estado_aceptacion, 'pendiente')
+
+    def test_generar_pdf_pedidos_reglas_de_negocio_y_paginacion(self):
+        alumno_con_foto = Alumno.objects.create(
+            usuario=self.cliente,
+            nombre='Carlos',
+            apellido_paterno='Gómez',
+            apellido_materno='López',
+            correo='carlos@example.com',
+            matricula='A200',
+            foto=imagen_de_prueba('avatar.png'),
+        )
+        otro_user = User.objects.create_user('alumno2', password='clave-segura-2')
+        alumno_sin_foto = Alumno.objects.create(
+            usuario=otro_user,
+            nombre='Elena',
+            apellido_paterno='Ruiz',
+            correo='elena@example.com',
+            matricula='A201',
+        )
+        fecha_actual = HorarioPedidos().fecha_servicio_actual()
+        fecha_pasada = fecha_actual - timedelta(days=2)
+
+        # 1. Día pasado no permite generar PDF y el botón aparece deshabilitado
+        Compra.objects.create(
+            alumno=alumno_con_foto,
+            alimentos=[{'nombre': 'Enchiladas', 'cantidad': 1, 'precio': '40.00', 'subtotal': '40.00'}],
+            total=Decimal('40.00'),
+            comprobante='pasado_aceptado.png',
+            fecha_servicio=fecha_pasada,
+            estado_aceptacion='aceptado',
+        )
+        self.entrar()
+        vista_pasada = self.client.get(reverse('comedor:lista_pedidos'), {'fecha': fecha_pasada.isoformat()})
+        self.assertContains(vista_pasada, 'disabled')
+        self.assertNotContains(
+            vista_pasada,
+            f"{reverse('comedor:generar_pdf_pedidos')}?fecha={fecha_pasada.isoformat()}",
+        )
+
+        intento_pasado = self.client.get(
+            reverse('comedor:generar_pdf_pedidos'),
+            {'fecha': fecha_pasada.isoformat()},
+            follow=True,
+        )
+        self.assertContains(intento_pasado, 'Solo se puede generar el PDF para los pedidos del día vigente.')
+
+        # 2. Día actual sin pedidos aceptados (solo pendientes y rechazados) muestra aviso
+        Compra.objects.create(
+            alumno=alumno_con_foto,
+            alimentos=[{'nombre': 'Torta', 'cantidad': 1, 'precio': '35.00', 'subtotal': '35.00'}],
+            total=Decimal('35.00'),
+            comprobante='pendiente.png',
+            fecha_servicio=fecha_actual,
+            estado_aceptacion='pendiente',
+        )
+        Compra.objects.create(
+            alumno=alumno_sin_foto,
+            alimentos=[{'nombre': 'Quesadilla', 'cantidad': 2, 'precio': '20.00', 'subtotal': '40.00'}],
+            total=Decimal('40.00'),
+            comprobante='rechazado.png',
+            fecha_servicio=fecha_actual,
+            estado_aceptacion='rechazado',
+        )
+        sin_aceptados = self.client.get(reverse('comedor:generar_pdf_pedidos'), follow=True)
+        self.assertContains(sin_aceptados, 'No hay pedidos aceptados para generar el PDF en esta fecha.')
+
+        # 3. Día actual con 7 pedidos aceptados genera PDF multipágina (6 por página -> 2 páginas)
+        for i in range(7):
+            Compra.objects.create(
+                alumno=alumno_con_foto if i % 2 == 0 else alumno_sin_foto,
+                alimentos=[{'nombre': f'Platillo {i + 1}', 'cantidad': (i % 3) + 1, 'precio': '30.00', 'subtotal': '30.00'}],
+                total=Decimal('30.00'),
+                comprobante=f'aceptado_{i}.png',
+                fecha_servicio=fecha_actual,
+                estado_aceptacion='aceptado',
+            )
+
+        respuesta_pdf = self.client.get(reverse('comedor:generar_pdf_pedidos'))
+        self.assertEqual(respuesta_pdf.status_code, 200)
+        self.assertEqual(respuesta_pdf['Content-Type'], 'application/pdf')
+        self.assertTrue(respuesta_pdf.content.startswith(b'%PDF-'))
+        self.assertIn(b'/Count 2', respuesta_pdf.content)
 
     def test_eliminar_solo_acepta_post(self):
         comida = crear_comida()
@@ -309,7 +507,7 @@ class ConfiguracionHorarioTests(TestCase):
         from alumnos.models import Alumno
         Alumno.objects.create(usuario=self.alumno, nombre='Vista', apellido_paterno='Horario', correo='horario@example.test', matricula='12345678')
         self.client.force_login(self.encargado)
-        for inicio, fin in (('16:30', '02:45'), ('08:00', '14:00')):
+        for inicio, fin in (('16:30', '02:45'), ('14:00', '04:00')):
             self.assertRedirects(self.client.post(self.url, {'hora_inicio': inicio, 'hora_fin': fin}), self.url)
             self.assertEqual(self.modelo.objects.count(), 1)
             horario = self.modelo.objects.get()
@@ -318,30 +516,44 @@ class ConfiguracionHorarioTests(TestCase):
             self.client.force_login(self.alumno)
             respuesta = self.client.get(reverse('alumnos:inicio'))
             self.assertEqual(respuesta.context['horario'].hora_inicio, horario.hora_inicio)
-            self.assertContains(respuesta, 'Del día siguiente' if fin < inicio else 'Del mismo día')
+            self.assertContains(respuesta, 'Del día siguiente')
             self.client.force_login(self.encargado)
 
     def test_errores_no_modifican_horario(self):
         from datetime import time
         self.modelo.objects.create()
         self.client.force_login(self.encargado)
-        for inicio, fin in (('', '03:00'), ('25:00', '03:00'), ('15:00', ''), ('15:00', '15:00'), ('15:00', 'abc')):
+        for inicio, fin in (
+            ('', '03:00'), ('25:00', '03:00'), ('15:00', ''),
+            ('15:00', '15:00'), ('15:00', 'abc'), ('13:59', '03:00'),
+            ('15:00', '04:01'), ('14:00', '15:00'),
+        ):
             respuesta = self.client.post(self.url, {'hora_inicio': inicio, 'hora_fin': fin})
             self.assertEqual(respuesta.status_code, 200)
             self.assertTrue(respuesta.context['form'].errors)
             self.assertEqual(self.modelo.objects.get().hora_inicio, time(15))
             self.assertEqual(self.modelo.objects.get().hora_fin, time(3))
 
-    def test_limites_horario_diurno_y_cruce_medianoche(self):
-        from datetime import time, datetime
-        from unittest.mock import patch
-        horario = self.modelo(hora_inicio=time(15), hora_fin=time(3))
-        for hora, esperado in ((time(14, 59), False), (time(15), True), (time(23, 59), True), (time(0), True), (time(2, 59), True), (time(3), False)):
+    def test_limites_horario_nocturno_y_fecha_de_servicio(self):
+        horario = self.modelo(hora_inicio=time(14), hora_fin=time(4))
+        for hora, esperado in (
+            (time(13, 59), False), (time(14), True), (time(23, 59), True),
+            (time(0), True), (time(3, 59), True), (time(4), False),
+        ):
             with self.subTest(hora=hora):
                 self.assertEqual(horario.permite_registro(hora), esperado)
-        horario.hora_inicio, horario.hora_fin = time(8), time(14)
-        for hora, esperado in ((time(7, 59), False), (time(8), True), (time(13, 59), True), (time(14), False), (time(0), False)):
-            with self.subTest(hora=hora):
-                self.assertEqual(horario.permite_registro(hora), esperado)
-        with patch('comedor.models.timezone.localtime', return_value=datetime(2026, 11, 12, 9)):
-            self.assertTrue(horario.permite_registro())
+        self.assertFalse(horario.permite_registro(time(9)))
+        instantes = (
+            (datetime(2026, 11, 15, 14), time(14), datetime(2026, 11, 16)),
+            (datetime(2026, 11, 15, 23, 59), time(23, 59), datetime(2026, 11, 16)),
+            (datetime(2026, 11, 16, 3, 59), time(3, 59), datetime(2026, 11, 16)),
+        )
+        for fecha_hora, hora, fecha_esperada in instantes:
+            instante = timezone.make_aware(fecha_hora)
+            with self.subTest(instante=instante):
+                self.assertEqual(horario.fecha_servicio_pedido(instante), fecha_esperada.date())
+                self.assertEqual(horario.fecha_servicio_actual(instante), fecha_esperada.date())
+        siguiente_apertura = timezone.make_aware(datetime(2026, 11, 16, 14))
+        self.assertEqual(horario.fecha_servicio_actual(siguiente_apertura), datetime(2026, 11, 17).date())
+        with self.assertRaises(ValueError):
+            horario.fecha_servicio_pedido(timezone.make_aware(datetime(2026, 11, 16, 4)))

@@ -8,7 +8,8 @@ from django.core.files.storage import FileSystemStorage
 from django.db import IntegrityError, transaction
 from django.test import TestCase, override_settings, Client
 from django.urls import reverse
-from comedor.models import Comida
+from django.utils import timezone
+from comedor.models import Comida, HorarioPedidos
 from .forms import RegistroAlumnoForm
 from .models import Alumno, Compra, Carrito
 from .views import registrar_alumno
@@ -297,6 +298,10 @@ class AlumnosTests(TestCase):
         self.assertRedirects(response, reverse('alumnos:compra_realizada', args=[compra.numero]))
         self.assertEqual(str(compra.total), '25.50')
         self.assertEqual(compra.estado_aceptacion, 'pendiente')
+        self.assertEqual(
+            compra.fecha_servicio,
+            HorarioPedidos().fecha_servicio_pedido(timezone.localtime(compra.creada)),
+        )
         self.assertTrue(compra.comprobante.storage.exists(compra.comprobante.name))
         self.assertFalse(Carrito.objects.exists())
         self.assertRedirects(self.client.post(url, {**datos, 'comprobante': foto()}), response.url)
@@ -468,16 +473,20 @@ class AlumnosTests(TestCase):
             self.assertNotContains(response, 'Ver por qué')
             self.assertEqual(self.client.get(razones).status_code, 404)
         compra.estado_aceptacion = 'rechazado'
-        compra.save(update_fields=['estado_aceptacion'])
+        compra.razon_rechazo = 'El comprobante no es legible.'
+        compra.save(update_fields=['estado_aceptacion', 'razon_rechazo'])
         response = self.client.get(detalle)
         self.assertContains(response, '¡Rechazamos tu pedido!')
+        self.assertContains(response, 'Motivo del rechazo')
+        self.assertContains(response, 'El comprobante no es legible.')
         self.assertContains(response, razones)
         self.assertContains(response, 'Tacos')
         self.assertContains(response, '$25.50')
         self.assertNotContains(response, 'Estado:')
         self.assertNotContains(response, '¡Recibimos tu pedido!')
         response = self.client.get(razones)
-        self.assertContains(response, 'Aún no hay razones disponibles')
+        self.assertContains(response, 'El comprobante no es legible.')
+        self.assertNotContains(response, 'Aún no hay razones disponibles')
         self.assertContains(response, detalle)
         self.client.logout()
         self.assertRedirects(self.client.get(razones), reverse('alumnos:login'))

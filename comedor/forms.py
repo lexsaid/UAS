@@ -1,3 +1,5 @@
+from datetime import time
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
@@ -9,9 +11,13 @@ MAX_LARGO_INGREDIENTE = 60
 
 class HorarioPedidosForm(forms.ModelForm):
     hora_inicio = forms.TimeField(label='Inicio del registro', input_formats=['%H:%M'],
-                                  widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'step': '60'}))
+                                  widget=forms.TimeInput(format='%H:%M', attrs={
+                                      'type': 'time', 'step': '60', 'min': '14:00',
+                                  }))
     hora_fin = forms.TimeField(label='Fin del registro', input_formats=['%H:%M'],
-                               widget=forms.TimeInput(format='%H:%M', attrs={'type': 'time', 'step': '60'}))
+                               widget=forms.TimeInput(format='%H:%M', attrs={
+                                   'type': 'time', 'step': '60', 'max': '04:00',
+                               }))
 
     class Meta:
         model = HorarioPedidos
@@ -19,8 +25,14 @@ class HorarioPedidosForm(forms.ModelForm):
 
     def clean(self):
         datos = super().clean()
-        if datos.get('hora_inicio') is not None and datos.get('hora_inicio') == datos.get('hora_fin'):
-            self.add_error('hora_fin', 'La hora de fin debe ser distinta de la hora de inicio.')
+        inicio = datos.get('hora_inicio')
+        fin = datos.get('hora_fin')
+        if inicio is not None and inicio < time(14):
+            self.add_error('hora_inicio', 'El registro debe iniciar a las 2:00 p. m. o después.')
+        if fin is not None and fin > time(4):
+            self.add_error('hora_fin', 'El registro debe terminar a más tardar a las 4:00 a. m.')
+        if inicio is not None and fin is not None and inicio <= fin:
+            self.add_error('hora_fin', 'La hora de fin debe ser del día siguiente al inicio.')
         return datos
 
 

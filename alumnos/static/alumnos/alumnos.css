@@ -511,6 +511,9 @@
 .detalle-rechazado .detalle-bienvenida {background:#f8eae5;border-bottom-color:#ead3cc}
 .detalle-rechazado .detalle-bienvenida h1 {color:#923b30}
 .detalle-rechazado .detalle-bienvenida p {color:#77594f}
+.detalle-razon-rechazo {max-width:48rem;margin:0 auto 1rem;padding:1rem 1.25rem;border:1px solid #e2c9c2;border-left:4px solid #b96b5a;border-radius:12px;background:#fff8f5;color:#77594f}
+.detalle-razon-rechazo strong {display:block;margin-bottom:.35rem;color:#923b30}
+.detalle-razon-rechazo p {margin:0;line-height:1.6;overflow-wrap:anywhere}
 .rechazo-icono {color:#a34b3d}
 .rechazo-icono svg {display:block;width:100%;height:auto}
 .detalle-rechazado .detalle-total {background:#fcf3ef;border-left-color:#c47d6c}
